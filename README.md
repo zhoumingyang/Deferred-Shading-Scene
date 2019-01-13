@@ -11,8 +11,7 @@ you can make your own scene with the same format json.<br>
 3. use assimp to import obj file<br>
 4. releaize some basic light source including direction light,point light and spot light<br>
 5. releaize basic camera operation<br>
-<br>
-## json format
+## json format<br>
 the json is divided by scenes, each scene has obj files and meshes wich is design by user<br>
 {<br>
     "scenes": [<br>
