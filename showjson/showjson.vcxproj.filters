@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\json">
+      <UniqueIdentifier>{8e7f8468-cc67-442a-b003-f4a7c658d20c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\jsonsrc">
+      <UniqueIdentifier>{f07eaa3c-ec36-408b-aa03-efd8ebbf612a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\design">
+      <UniqueIdentifier>{fb88d3f9-187a-4da5-87f6-fb947734aa17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\shader">
+      <UniqueIdentifier>{1d4fe985-eb8c-4973-bb67-3d4ebdb97220}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\res">
+      <UniqueIdentifier>{dfbc259d-0385-4e1c-a1fb-59eafa84a4b9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="fileparse.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonsrc\json_reader.cpp">
+      <Filter>源文件\jsonsrc</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonsrc\json_value.cpp">
+      <Filter>源文件\jsonsrc</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonsrc\json_writer.cpp">
+      <Filter>源文件\jsonsrc</Filter>
+    </ClCompile>
+    <ClCompile Include="vbo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="vao.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ibo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="light.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="parallellight.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pointlight.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="spotlight.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="fbo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="renderbuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gbuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="jsonconfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="fileparse.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="json\allocator.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\assertions.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\autolink.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\config.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\features.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\forwards.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="jsonsrc\json_tool.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\reader.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\value.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\version.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\writer.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="vbo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="vao.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ibo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="parallellight.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pointlight.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="spotlight.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="drand.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="fbo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="renderbuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gbuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="jsonsrc\json_valueiterator.inl">
+      <Filter>头文件\json</Filter>
+    </None>
+    <None Include="shader\showjson.fs">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\showjson.vs">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToGbuffer.fs">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToGbuffer.vs">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToWindow.fs">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToWindow.vs">
+      <Filter>资源文件\shader</Filter>
+    </None>
+  </ItemGroup>
+</Project>
