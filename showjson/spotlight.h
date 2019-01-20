@@ -3,6 +3,7 @@
 #define SPOT_LIGHT_H
 #include "light.h"
 #include "shader.h"
+#define MAX_ATTACH_SHADERS 100
 
 struct SpotLightUniformLocation {
 	GLuint color;
@@ -14,6 +15,7 @@ struct SpotLightUniformLocation {
 	GLuint constant;
 	GLuint linear;
 	GLuint exp;
+	GLuint shader;
 };
 
 class SpotLight :public Light {
@@ -22,7 +24,8 @@ private:
 	glm::vec3 position;
 	float cutoff;
 	LightAttenuation attenuation;
-	SpotLightUniformLocation unifLocation;
+	SpotLightUniformLocation unifLocations[MAX_ATTACH_SHADERS];
+	int shaderCount;
 public:
 	SpotLight();
 	SpotLight(const glm::vec3& _position, const glm::vec3& _direction,
@@ -44,7 +47,7 @@ public:
 	void setCutoffUniform(const GLint& location) const;
 	void setAttenuationUniform(const GLint& consLocation, const  GLint& linrLocation, const GLint expLocation) const;
 	void initUniformLocation(Shader& shader, const int& index);
-	SpotLightUniformLocation getUniformLocation() const;
-	void setAllUniformParams() const;
+	SpotLightUniformLocation getUniformLocation(Shader& shader) const;
+	void setAllUniformParams(Shader& shader) const;
 };
 #endif // !SPOT_LIGHT_H

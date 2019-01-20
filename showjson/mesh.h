@@ -5,13 +5,16 @@
 #include "vao.h"
 #include "ibo.h"
 #include "texture.h"
+#include "shapegeometry.h"
 #include <Importer.hpp>
 #include <scene.h>
 #include <postprocess.h>
 
 enum MeshType {
 	NORMALMESH,
-	OBJMESH
+	OBJMESH,
+	AIDMESH,
+	NONE
 };
 
 class Shader;
@@ -45,6 +48,7 @@ private:
 	std::string textureUrl;
 	std::string normalTextureUrl;
 	std::vector<MeshUnit> meshUnits;
+	glm::vec3 color;
 	MeshType type;
 	void processNode(const aiNode *node, const aiScene *scene);
 	MeshUnit processMesh(const aiMesh *mesh, const aiScene *scene);
@@ -52,6 +56,7 @@ public:
 	Mesh(const Model& model);
 	Mesh(const Model& model, Shader* _pShader);
 	Mesh(const MeshUnit& meshUnit);
+	Mesh(const ShapeGeometry& shape);
 	~Mesh();
 	void initBuffer();
 	void initTexture();
@@ -67,5 +72,6 @@ public:
 	glm::mat4 getNormalMatrix() const;
 	void setShader(Shader* _pShader);
 	MeshType getMeshType() const;
+	glm::vec3 getColor() const;
 };
 #endif // !MESH_H

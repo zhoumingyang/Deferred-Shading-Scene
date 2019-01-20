@@ -3,6 +3,7 @@
 #define POINT_LIGHT_H
 #include "light.h"
 #include "shader.h"
+#define MAX_ATTACH_SHADERS 100
 
 struct PointLightUniformLocation {
 	GLuint color;
@@ -12,13 +13,15 @@ struct PointLightUniformLocation {
 	GLuint constant;
 	GLuint linear;
 	GLuint exp;
+	GLuint shader;
 };
 
 class PointLight: public Light {
 private:
 	glm::vec3 position;
 	LightAttenuation attenuation;
-	PointLightUniformLocation unifLocation;
+	PointLightUniformLocation unifLocations[MAX_ATTACH_SHADERS];
+	int shaderCount;
 public:
 	PointLight();
 	PointLight(const glm::vec3 _position, const LightAttenuation& _attenuation);
@@ -31,7 +34,7 @@ public:
 	LightAttenuation getAttenuation() const;
 	void setAttenuationUniform(const GLint& consLocation, const  GLint& linrLocation, const GLint expLocation) const;
 	void initUniformLocation(Shader& shader, const int& index);
-	PointLightUniformLocation getUniformLocation() const;
-	void setAllUniformParams() const;
+	PointLightUniformLocation getUniformLocation(Shader& shader) const;
+	void setAllUniformParams(Shader& shader) const;
 };
 #endif // !POINT_LIGHT_H

@@ -24,7 +24,7 @@ public:
 	GLuint getTexObjectByIndex(const int& index = 0) const;
 	int getTextureCount() const;
 	void setTextureData(const int& index, const void* data, const GLint& innerFormat, 
-		const int& width, const int& height, const GLenum& format) const;
+		const int& width, const int& height, const GLenum& format, const GLenum& type = GL_UNSIGNED_BYTE) const;
 	void setOridinaryTexParam() const;
 };
 #endif // !TEXTURE_H

@@ -40,6 +40,9 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 in vec2 vUv;
 
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
+
 vec4 calcAmbientColor(ParallelLight _prleLight) {
 	return vec4(_prleLight.color * _prleLight.ambient, 1.0f);
 }
@@ -106,5 +109,12 @@ void main() {
 	for(int i = 0; i < tmpNumPointLight; i++) {
 		pointLightColor += calcPointLight(tmpNormal, pointLights[i], tmpPos);
 	}
-    gl_FragColor = texColor*(pointLightColor);
+
+	FragColor =  texColor * (pointLightColor);
+	float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if(brightness > 0.98) {
+		BrightColor = vec4(FragColor.rgb, 1.0);
+	} else {
+		BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+	}
 }

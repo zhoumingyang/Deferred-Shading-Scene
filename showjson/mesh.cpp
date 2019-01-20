@@ -15,7 +15,7 @@ Mesh::Mesh(const Model& model) {
 	objUrl = model.objUrl;
 	textureUrl = model.textureUrl;
 	normalTextureUrl = model.textureUrl;
-
+	color = glm::vec3(1.0, 1.0, 1.0);
 	pVao = NULL;
 	pVertexBuffer = NULL;
 	pUvBuffer = NULL;
@@ -41,7 +41,7 @@ Mesh::Mesh(const Model& model, Shader* _pShader) {
 	objUrl = model.objUrl;
 	textureUrl = model.textureUrl;
 	normalTextureUrl = model.textureUrl;
-
+	color = glm::vec3(1.0, 1.0, 1.0);
 	pVao = NULL;
 	pVertexBuffer = NULL;
 	pUvBuffer = NULL;
@@ -55,6 +55,19 @@ Mesh::Mesh(const Model& model, Shader* _pShader) {
 
 Mesh::Mesh(const MeshUnit& meshUnit) {
 	meshUnits.push_back(meshUnit);
+	color = glm::vec3(1.0, 1.0, 1.0);
+	type = NONE;
+	modelMat = glm::mat4(1.0);
+	normalMat = glm::mat4(1.0);
+}
+
+Mesh::Mesh(const ShapeGeometry& shape) {
+	MeshUnit tmpMeshUnit(shape.getVertices(), shape.getUvs(), shape.getNormals(), shape.getIndices());
+	meshUnits.push_back(tmpMeshUnit);
+	type = AIDMESH;
+	modelMat = shape.getModelMatrix();
+	normalMat = shape.getNormalMatrix();
+	color = shape.getColor();
 }
 
 Mesh::~Mesh() {
@@ -247,4 +260,8 @@ void Mesh::setShader(Shader* _pShader) {
 
 MeshType Mesh::getMeshType() const {
 	return type;
+}
+
+glm::vec3 Mesh::getColor() const {
+	return color;
 }

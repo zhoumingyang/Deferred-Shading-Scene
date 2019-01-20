@@ -17,7 +17,7 @@ private:
 	std::vector<float> widths;
 	std::vector<float> heights;
 public:
-	FBO();
+	FBO(const int& _count = 1);
 	FBO(const std::vector<float>& _widths, const std::vector<float>& _heights, const int& _count);
 	FBO(float _widths[], float _heights[], const int& _count);
 	FBO(const float& _width, const float& _height);
@@ -31,8 +31,8 @@ public:
 	std::vector<float> getAllHeights() const;
 	float getFrameWidthByIndex(const int& index) const;
 	float getFrameHeightByIndex(const int& index) const;
-	void attachRenderBuffer(const RenderBuffer& renderBuffer) const;
-	void attachTexture(const Texture& texture, const GLenum& attachPoint) const;
+	void attachRenderBuffer(const RenderBuffer& renderBuffer, const int& index = 0) const;
+	void attachTexture(const Texture& texture, const GLenum& attachPoint, const int& textureIndex = 0) const;
 	void frameBufferStatusCheck() const;
 };
 #endif // !FBO_H

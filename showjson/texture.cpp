@@ -55,8 +55,8 @@ GLuint Texture::getTexObjectByIndex(const int& index) const {
 }
 
 void Texture::setTextureData(const int& index, const void* data, const GLint& innerFormat,
-	const int& width, const int& height, const GLenum& format) const {
-	glTexImage2D(GL_TEXTURE_2D, 0, innerFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	const int& width, const int& height, const GLenum& format, const GLenum& type) const {
+	glTexImage2D(GL_TEXTURE_2D, 0, innerFormat, width, height, 0, format, type, data);
 }
 
 void Texture::active(const int& slot = 0, const int& index = 0) const {

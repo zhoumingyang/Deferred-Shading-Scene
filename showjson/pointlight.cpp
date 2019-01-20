@@ -4,18 +4,21 @@ PointLight::PointLight() :Light() {
 	position = glm::vec3(0.0, 0.0, 0.0);
 	attenuation = LightAttenuation();
 	lightName = "point light";
+	shaderCount = 0;
 }
 
 PointLight::PointLight(const glm::vec3 _position, const LightAttenuation& _attenuation) : Light() {
 	position = _position;
 	attenuation = _attenuation;
 	lightName = "point light";
+	shaderCount = 0;
 }
 
 PointLight::PointLight(const glm::vec3 _position, const LightAttenuation& _attenuation, const glm::vec3& _color, const float& _ambient, const float& _diffuse)
 	: Light(_color, _ambient, _diffuse) {
 	position = _position;
 	attenuation = _attenuation;
+	shaderCount = 0;
 }
 
 PointLight::~PointLight() {
@@ -49,6 +52,7 @@ void PointLight::setAttenuationUniform(const GLint& consLocation, const  GLint& 
 }
 
 void PointLight::initUniformLocation(Shader& shader, const int& index) {
+	PointLightUniformLocation unifLocation;
 	std::string pt = "pointLights";
 	pt += ("[" + std::to_string(index) + "]");
 	unifLocation.color = shader.getUniformLocation((pt + ".color").c_str());
@@ -58,13 +62,26 @@ void PointLight::initUniformLocation(Shader& shader, const int& index) {
 	unifLocation.constant = shader.getUniformLocation((pt + ".attenuation.constant").c_str());
 	unifLocation.linear = shader.getUniformLocation((pt + ".attenuation.linear").c_str());
 	unifLocation.exp = shader.getUniformLocation((pt + ".attenuation.exp").c_str());
+	unifLocation.shader = shader.getShaderObject();
+	unifLocations[shaderCount++] = unifLocation;
+	if (shaderCount >= MAX_ATTACH_SHADERS) {
+		shaderCount = MAX_ATTACH_SHADERS - 1;
+	}
 }
 
-PointLightUniformLocation PointLight::getUniformLocation() const {
+PointLightUniformLocation PointLight::getUniformLocation(Shader& shader) const {
+	PointLightUniformLocation unifLocation;
+	GLuint shaderObj = shader.getShaderObject();
+	for (int i = 0; i < shaderCount; i++) {
+		if (unifLocations[i].shader == shaderObj) {
+			unifLocation = unifLocations[i];
+		}
+	}
 	return unifLocation;
 }
 
-void PointLight::setAllUniformParams() const {
+void PointLight::setAllUniformParams(Shader& shader) const {
+	PointLightUniformLocation unifLocation = getUniformLocation(shader);
 	setColorUniform(unifLocation.color);
 	setAmbientUniform(unifLocation.ambient);
 	setDiffuseUniform(unifLocation.diffuse);

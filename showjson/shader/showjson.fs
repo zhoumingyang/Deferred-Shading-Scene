@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 const int MAX_PARALLEL_LIGHTS = 9;
-const int MAX_POINT_LIGHTS = 25;
+const int MAX_POINT_LIGHTS = 100;
 const int MAX_SPOT_LIGHTS = 9;
 
 in vec2 vUv;

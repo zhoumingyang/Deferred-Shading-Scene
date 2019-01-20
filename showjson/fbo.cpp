@@ -1,7 +1,7 @@
 #include "fbo.h"
 
-FBO::FBO() {
-	count = 1;
+FBO::FBO(const int& _count) {
+	count = _count;
 	fbos = new GLuint[count];
 	widths.push_back(1024);
 	heights.push_back(760);
@@ -97,14 +97,14 @@ float  FBO::getFrameWidthByIndex(const int& index) const {
 	return widths[index];
 }
 
-void FBO::attachRenderBuffer(const RenderBuffer& renderBuffer) const {
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, renderBuffer.getAttachByIndex(0), 
-		GL_RENDERBUFFER, renderBuffer.getRenderObjectByIndex(0));
+void FBO::attachRenderBuffer(const RenderBuffer& renderBuffer, const int& index) const {
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, renderBuffer.getAttachByIndex(index),
+		GL_RENDERBUFFER, renderBuffer.getRenderObjectByIndex(index));
 }
 
-void FBO::attachTexture(const Texture& texture, const GLenum& attachPoint) const {
+void FBO::attachTexture(const Texture& texture, const GLenum& attachPoint, const int& textureIndex) const {
 	texture.setOridinaryTexParam();
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachPoint, GL_TEXTURE_2D, texture.getTexObjectByIndex(0), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachPoint, GL_TEXTURE_2D, texture.getTexObjectByIndex(textureIndex), 0);
 }
 
 void FBO::frameBufferStatusCheck() const {

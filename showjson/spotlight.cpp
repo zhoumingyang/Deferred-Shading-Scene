@@ -6,6 +6,7 @@ SpotLight::SpotLight() :Light() {
 	cutoff = 0.0;
 	attenuation = LightAttenuation();
 	lightName = "spot light";
+	shaderCount = 0;
 }
 
 SpotLight::SpotLight(const glm::vec3& _position, const glm::vec3& _direction,
@@ -15,6 +16,7 @@ SpotLight::SpotLight(const glm::vec3& _position, const glm::vec3& _direction,
 	cutoff = _cutoff;
 	attenuation = _attenuation;
 	lightName = "spot light";
+	shaderCount = 0;
 }
 
 SpotLight::SpotLight(const glm::vec3& _position, const glm::vec3& _direction,
@@ -24,6 +26,7 @@ SpotLight::SpotLight(const glm::vec3& _position, const glm::vec3& _direction,
 	direction = _direction;
 	cutoff = _cutoff;
 	attenuation = _attenuation;
+	shaderCount = 0;
 }
 
 SpotLight::~SpotLight() {
@@ -96,6 +99,7 @@ void SpotLight::setAttenuationUniform(const GLint& consLocation, const  GLint& l
 }
 
 void SpotLight::initUniformLocation(Shader& shader, const int& index) {
+	SpotLightUniformLocation unifLocation;
 	std::string pt = "spotLights";
 	pt += ("[" + std::to_string(index) + "]");
 	unifLocation.color = shader.getUniformLocation((pt + ".color").c_str());
@@ -107,13 +111,23 @@ void SpotLight::initUniformLocation(Shader& shader, const int& index) {
 	unifLocation.constant = shader.getUniformLocation((pt + ".attenuation.constant").c_str());
 	unifLocation.linear = shader.getUniformLocation((pt + ".attenuation.linear").c_str());
 	unifLocation.exp = shader.getUniformLocation((pt + ".attenuation.exp").c_str());
+	unifLocation.shader = shader.getShaderObject();
+	unifLocations[shaderCount++] = unifLocation;
 }
 
-SpotLightUniformLocation SpotLight::getUniformLocation() const {
+SpotLightUniformLocation SpotLight::getUniformLocation(Shader& shader) const {
+	SpotLightUniformLocation unifLocation;
+	GLuint shaderObj = shader.getShaderObject();
+	for (int i = 0; i < shaderCount; i++) {
+		if (unifLocations[i].shader == shaderObj) {
+			unifLocation = unifLocations[i];
+		}
+	}
 	return unifLocation;
 }
 
-void SpotLight::setAllUniformParams() const {
+void SpotLight::setAllUniformParams(Shader& shader) const {
+	SpotLightUniformLocation unifLocation = getUniformLocation(shader);
 	setColorUniform(unifLocation.color);
 	setAmbientUniform(unifLocation.ambient);
 	setDiffuseUniform(unifLocation.diffuse);
