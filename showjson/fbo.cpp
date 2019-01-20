@@ -1,10 +1,13 @@
 #include "fbo.h"
 
+const unsigned int WINDOW_WIDTH = 1024;
+const unsigned int WINDOW_HEIGHT = 760;
+
 FBO::FBO(const int& _count) {
 	count = _count;
 	fbos = new GLuint[count];
-	widths.push_back(1024);
-	heights.push_back(760);
+	widths.push_back(WINDOW_WIDTH);
+	heights.push_back(WINDOW_HEIGHT);
 	glGenFramebuffers(count, fbos);
 }
 
@@ -15,8 +18,8 @@ FBO::FBO(const std::vector<float>& _widths, const std::vector<float>& _heights, 
 	count = tmpCount > heightCount ? heightCount : tmpCount;
 	if (count <= 0) {
 		count = 1;
-		widths.push_back(1024);
-		heights.push_back(760);
+		widths.push_back(WINDOW_WIDTH);
+		heights.push_back(WINDOW_HEIGHT);
 	}
 	else {
 		for (int i = 0; i < count; i++) {
@@ -31,8 +34,8 @@ FBO::FBO(const std::vector<float>& _widths, const std::vector<float>& _heights, 
 FBO::FBO(float _widths[], float _heights[], const int& _count) {
 	if (count <= 0) {
 		count = 1;
-		widths.push_back(1024);
-		heights.push_back(760);
+		widths.push_back(WINDOW_WIDTH);
+		heights.push_back(WINDOW_HEIGHT);
 	}
 	else {
 		for (int i = 0; i < count;i++) {

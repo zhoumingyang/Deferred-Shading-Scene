@@ -53,52 +53,6 @@ glm::vec3 up = glm::vec3(0.0, 1.0, 0.0);
 glm::vec3 center = glm::vec3(0.0, 0.0, 0.0);
 Camera camera;
 
-/***************************uniform location********************************/
-//oridinary render uniform location
-GLuint mvpLocation;
-GLuint worldMatLocation;
-GLuint normalMatLocation;
-GLuint texLocation;
-GLuint specularLocation;
-GLuint specularPowLocation;
-GLuint eyeWorldPosLocation;
-GLuint texMapLocation;
-GLuint numPrleLightLocation;
-GLuint numPointLightLocation;
-GLuint numSpotLightLocation;
-/***********************************************************/
-//gBufers uniform location
-GLuint gMvpLocation;
-GLuint gWorldMatrixLocation;
-GLuint gNormalMatrixLocation;
-GLuint gTexLocation;
-GLuint gIsMapLocation;
-GLuint gSphereColorLocation;
-
-//render to window uniform location
-GLuint wDiffuseTexLocation;
-GLuint wPositionTexLocation;
-GLuint wNormalTexLocation;
-GLuint wNumPrleLightLocation;
-GLuint wNumPointLightLocation;
-/***********************************************************/
-//render to frame buffer uniform location
-GLuint fDiffuseTexLocation;
-GLuint fPositionTexLocation;
-GLuint fNormalTexLocation;
-GLuint fNumPrleLightLocation;
-GLuint fNumPointLightLocation;
-
-//blur render uniform location
-GLuint bBrightImgLocation;
-GLuint bHorizontal;
-
-//render final to window
-GLuint fnSceneImgLocation;
-GLuint fnBlurImgLocation;
-GLuint fnBloom;
-GLuint fnExposure;
-
 /*************************matrix**********************************/
 glm::mat4 molMat4;
 glm::mat4 MVP;
@@ -310,17 +264,6 @@ void testShowMultiModelGL(FileParse* p) {
 
 void initUniformLocation() {
 	if (renderOridinary) {
-		mvpLocation = renderOridinary->getUniformLocation("mvp");
-		worldMatLocation = renderOridinary->getUniformLocation("worldMatrix");
-		normalMatLocation = renderOridinary->getUniformLocation("normalMatrix");
-		texLocation = renderOridinary->getUniformLocation("tex");
-		specularLocation = renderOridinary->getUniformLocation("specular");
-		specularPowLocation = renderOridinary->getUniformLocation("specualrPower");
-		eyeWorldPosLocation = renderOridinary->getUniformLocation("eyeWorldPos");
-		texMapLocation = renderOridinary->getUniformLocation("texMap");
-		numPrleLightLocation = renderOridinary->getUniformLocation("numPrleLight");
-		numPointLightLocation = renderOridinary->getUniformLocation("numPointLight");
-		numSpotLightLocation = renderOridinary->getUniformLocation("numSpotLight");
 		for (int i = 0; i < prleLights.size(); i++) {
 			prleLights[i]->initUniformLocation(*renderOridinary, i);
 		}
@@ -331,20 +274,7 @@ void initUniformLocation() {
 			spotLights[i]->initUniformLocation(*renderOridinary, i);
 		}
 	}
-	if (renderGBuffer) {
-		gMvpLocation = renderGBuffer->getUniformLocation("mvp");
-		gWorldMatrixLocation = renderGBuffer->getUniformLocation("worldMatrix");
-		gNormalMatrixLocation = renderGBuffer->getUniformLocation("normalMatrix");
-		gTexLocation = renderGBuffer->getUniformLocation("tex");
-		gIsMapLocation = renderGBuffer->getUniformLocation("isMap");
-		gSphereColorLocation = renderGBuffer->getUniformLocation("lightSphereColor");
-	}
 	if (renderWindow) {
-		wDiffuseTexLocation = renderWindow->getUniformLocation("tDiffuse");
-		wPositionTexLocation = renderWindow->getUniformLocation("tPosition");
-		wNormalTexLocation = renderWindow->getUniformLocation("tNormal");
-		wNumPrleLightLocation = renderWindow->getUniformLocation("numPrleLight");
-		wNumPointLightLocation = renderWindow->getUniformLocation("numPointLight");
 		for (int i = 0; i < prleLights.size(); i++) {
 			prleLights[i]->initUniformLocation(*renderWindow, i);
 		}
@@ -353,27 +283,12 @@ void initUniformLocation() {
 		}
 	}
 	if (renderFBuffer) {
-		fDiffuseTexLocation = renderFBuffer->getUniformLocation("tDiffuse");
-		fPositionTexLocation = renderFBuffer->getUniformLocation("tPosition");
-		fNormalTexLocation = renderFBuffer->getUniformLocation("tNormal");
-		fNumPrleLightLocation = renderFBuffer->getUniformLocation("numPrleLight");
-		fNumPointLightLocation = renderFBuffer->getUniformLocation("numPointLight");
 		for (int i = 0; i < prleLights.size(); i++) {
 			prleLights[i]->initUniformLocation(*renderFBuffer, i);
 		}
 		for (int i = 0; i < pointLights.size(); i++) {
 			pointLights[i]->initUniformLocation(*renderFBuffer, i);
 		}
-	}
-	if (renderBlur) {
-		bBrightImgLocation = renderBlur->getUniformLocation("brightImage");
-		bHorizontal = renderBlur->getUniformLocation("horizontal");
-	}
-	if (renderFinal) {
-		fnSceneImgLocation = renderFinal->getUniformLocation("sceneImage");
-		fnBlurImgLocation = renderFinal->getUniformLocation("blurImage");
-		fnBloom = renderFinal->getUniformLocation("bloom");
-		fnExposure = renderFinal->getUniformLocation("exposure");
 	}
 }
 
@@ -530,19 +445,27 @@ void multiRenderGBuffer(const Camera& camera) {
 			glm::mat4 normalMat = pMesh[i]->getNormalMatrix();
 			glm::vec3 tmpColor = pMesh[i]->getColor();
 			MVP = camera.getProjectViewModelMat(pMesh[i]->getModelMatrix());
-			renderGBuffer->setUniform1i(gTexLocation, 0);
+			/*renderGBuffer->setUniform1i(gTexLocation, 0);
 			renderGBuffer->setUniformMatrix4fv(gMvpLocation, &MVP[0][0]);
 			renderGBuffer->setUniformMatrix4fv(gWorldMatrixLocation, &worldMat[0][0]);
 			renderGBuffer->setUniformMatrix4fv(gNormalMatrixLocation, &normalMat[0][0]);
-			renderGBuffer->setUniform3f(gSphereColorLocation, tmpColor);
+			renderGBuffer->setUniform3f(gSphereColorLocation, tmpColor);*/
+			renderGBuffer->setUniform1i("tex", 0);
+			renderGBuffer->setUniformMatrix4fv("mvp", &MVP[0][0]);
+			renderGBuffer->setUniformMatrix4fv("worldMatrix", &worldMat[0][0]);
+			renderGBuffer->setUniformMatrix4fv("normalMatrix", &normalMat[0][0]);
+			renderGBuffer->setUniform3f("lightSphereColor", tmpColor);
 			if (pMesh[i]->getMeshType() == NORMALMESH && pMesh[i]->getTexture() != NULL) {
-				renderGBuffer->setUniform1i(gIsMapLocation, 1);
+				//renderGBuffer->setUniform1i(gIsMapLocation, 1);
+				renderGBuffer->setUniform1i("isMap", 1);
 			}
 			else if (pMesh[i]->getMeshType() == OBJMESH) {
-				renderGBuffer->setUniform1i(gIsMapLocation, 0);
+				//renderGBuffer->setUniform1i(gIsMapLocation, 0);
+				renderGBuffer->setUniform1i("isMap", 0);
 			}
 			else if (pMesh[i]->getMeshType() == AIDMESH) {
-				renderGBuffer->setUniform1i(gIsMapLocation, 2);
+				//renderGBuffer->setUniform1i(gIsMapLocation, 2);
+				renderGBuffer->setUniform1i("isMap", 2);
 			}
 			pMesh[i]->render();
 		}
@@ -560,15 +483,15 @@ void multiRenderFBuffer() {
 			pointLights[i]->setAllUniformParams(*renderFBuffer);
 		}
 	}
-	renderFBuffer->setUniform1i(fNumPrleLightLocation, prleLights.size());
-	renderFBuffer->setUniform1i(fNumPointLightLocation, pointLights.size());
+	renderFBuffer->setUniform1i("numPrleLight", prleLights.size());
+	renderFBuffer->setUniform1i("numPointLight", pointLights.size());
 
 	gBuffer->activeDiffuseTexture(0, 0);
-	renderFBuffer->setUniform1i(fDiffuseTexLocation, 0);
+	renderFBuffer->setUniform1i("tDiffuse", 0);
 	gBuffer->activePositionTexture(1, 0);
-	renderFBuffer->setUniform1i(fPositionTexLocation, 1);
+	renderFBuffer->setUniform1i("tPosition", 1);
 	gBuffer->activeNormalTexture(2, 0);
-	renderFBuffer->setUniform1i(fNormalTexLocation, 2);
+	renderFBuffer->setUniform1i("tNormal", 2);
 	quaMesh->render();
 	gBuffer->deactiveDiffuseTexture(0, 0);
 	gBuffer->deactivePositionTexture(1, 0);
@@ -586,15 +509,15 @@ void multiRenderWindow() {
 			pointLights[i]->setAllUniformParams(*renderWindow);
 		}
 	}
-	renderWindow->setUniform1i(wNumPrleLightLocation, prleLights.size());
-	renderWindow->setUniform1i(wNumPointLightLocation, pointLights.size());
+	renderWindow->setUniform1i("numPrleLight", prleLights.size());
+	renderWindow->setUniform1i("numPointLight", pointLights.size());
 
 	gBuffer->activeDiffuseTexture(0, 0);
-	renderWindow->setUniform1i(wDiffuseTexLocation, 0);
+	renderWindow->setUniform1i("tDiffuse", 0);
 	gBuffer->activePositionTexture(1, 0);
-	renderWindow->setUniform1i(wPositionTexLocation, 1);
+	renderWindow->setUniform1i("tPosition", 1);
 	gBuffer->activeNormalTexture(2, 0);
-	renderWindow->setUniform1i(wNormalTexLocation, 2);
+	renderWindow->setUniform1i("tNormal",2);
 	quaMesh->render();
 	gBuffer->deactiveDiffuseTexture(0, 0);
 	gBuffer->deactivePositionTexture(1, 0);
@@ -620,27 +543,27 @@ void multiRenderOridinary(const Camera& camera) {
 			spotLights[i]->setAllUniformParams(*renderOridinary);
 		}
 	}
-	renderOridinary->setUniform1f(specularLocation, 1.0);
-	renderOridinary->setUniform1f(specularPowLocation, 1.0);
-	renderOridinary->setUniform3f(eyeWorldPosLocation, eye);
-	renderOridinary->setUniform1i(numPrleLightLocation, prleLights.size());
-	renderOridinary->setUniform1i(numPointLightLocation, pointLights.size());
-	renderOridinary->setUniform1i(numSpotLightLocation, spotLights.size());
+	renderOridinary->setUniform1f("specular", 1.0);
+	renderOridinary->setUniform1f("specualrPower", 1.0);
+	renderOridinary->setUniform3f("eyeWorldPos", eye);
+	renderOridinary->setUniform1i("numPrleLight", prleLights.size());
+	renderOridinary->setUniform1i("numPointLight", pointLights.size());
+	renderOridinary->setUniform1i("numSpotLight", spotLights.size());
 	for (int i = 0; i < pMesh.size(); i++) {
 		if (pMesh[i] != NULL) {
 			glm::mat4 worldMat = pMesh[i]->getModelMatrix();
 			glm::mat4 normalMat = pMesh[i]->getNormalMatrix();
 			MV = camera.getModelViewMat(pMesh[i]->getModelMatrix());
 			MVP = camera.getProjectViewModelMat(pMesh[i]->getModelMatrix());
-			renderOridinary->setUniform1i(texLocation, 0);
-			renderOridinary->setUniformMatrix4fv(mvpLocation, &MVP[0][0]);
-			renderOridinary->setUniformMatrix4fv(worldMatLocation, &worldMat[0][0]);
-			renderOridinary->setUniformMatrix4fv(normalMatLocation, &normalMat[0][0]);
+			renderOridinary->setUniform1i("tex", 0);
+			renderOridinary->setUniformMatrix4fv("mvp", &MVP[0][0]);
+			renderOridinary->setUniformMatrix4fv("worldMatrix", &worldMat[0][0]);
+			renderOridinary->setUniformMatrix4fv("normalMatrix", &normalMat[0][0]);
 			if (pMesh[i]->getMeshType() == NORMALMESH) {
-				renderOridinary->setUniform1i(texMapLocation, 1);
+				renderOridinary->setUniform1i("texMap", 1);
 			}
 			else {
-				renderOridinary->setUniform1i(texMapLocation, 0);
+				renderOridinary->setUniform1i("texMap", 0);
 			}
 			pMesh[i]->render();
 		}
@@ -704,10 +627,10 @@ void renderGL() {
 		renderBlur->use();
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
-		renderBlur->setUniform1i(bBrightImgLocation, 0);
+		renderBlur->setUniform1i("brightImage", 0);
 		for (int i = 0; i < amount; i++) {
 			blurFBO->bind(horizontal);
-			renderBlur->setUniform1i(bHorizontal, horizontal);
+			renderBlur->setUniform1i("horizontal", horizontal);
 			first ? colorTexture->bind(1) : blurTexture->bind(!horizontal);
 			quaMesh->render();
 			horizontal = !horizontal;
@@ -719,16 +642,15 @@ void renderGL() {
 		renderBlur->unuse();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
 		renderFinal->use();
 		glActiveTexture(GL_TEXTURE0);
 		colorTexture->bind(0);
-		renderFinal->setUniform1i(fnSceneImgLocation, 0);
+		renderFinal->setUniform1i("sceneImage", 0);
 		glActiveTexture(GL_TEXTURE1);
 		blurTexture->bind(!horizontal);
-		renderFinal->setUniform1i(fnBlurImgLocation, 1);
-		renderFinal->setUniform1i(fnBloom, true);
-		renderFinal->setUniform1f(fnExposure, 1.0);
+		renderFinal->setUniform1i("blurImage", 1);
+		renderFinal->setUniform1i("bloom", true);
+		renderFinal->setUniform1f("exposure", 1.0);
 		quaMesh->render();
 		blurTexture->unBind();
 		colorTexture->unBind();

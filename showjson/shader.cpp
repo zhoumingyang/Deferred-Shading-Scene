@@ -24,6 +24,8 @@ Shader::~Shader() {
 	if (shaderProgram == 0xffffffff) {
 		glDeleteProgram(shaderProgram);
 	}
+	mapUniformLocation.clear();
+	std::map<std::string, GLuint>().swap(mapUniformLocation);
 }
 
 bool Shader::doRead(std::ifstream& f, std::string& outFile) {
@@ -89,6 +91,9 @@ void Shader::compileShader() {
 		exit(1);
 	}
 
+	parseUniform(vs);
+	parseUniform(fs);
+
 	attachShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 	attachShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
@@ -113,6 +118,7 @@ void Shader::compileShader() {
 		exit(1);
 	}
 	glUseProgram(shaderProgram);
+	initUniformLocation();
 }
 
 GLuint Shader::getShaderObject() const {
@@ -126,6 +132,15 @@ void Shader::use() const {
 void Shader::unuse() const {
 	glUseProgram(0);
 }
+
+void Shader::setMeshes(const std::vector<Mesh*>& _meshes) {
+	meshes = _meshes;
+}
+
+std::vector<Mesh*> Shader::getMeshes() const {
+	return meshes;
+}
+
 
 int Shader::getUniformLocation(const GLchar* varName) {
 	return glGetUniformLocation(shaderProgram, varName);
@@ -149,14 +164,6 @@ void Shader::setUniformMatrix4fv(const GLint& location, const GLfloat* value) {
 	}
 }
 
-void Shader::setMeshes(const std::vector<Mesh*>& _meshes) {
-	meshes = _meshes;
-}
-
-std::vector<Mesh*> Shader::getMeshes() const {
-	return meshes;
-}
-
 void Shader::setUniform1f(const GLint& location, const float& value) const {
 	if (location != 0xffffffff) {
 		glUniform1f(location, value);
@@ -172,5 +179,75 @@ void Shader::setUniform3f(const GLint& location, const glm::vec3& value) const {
 	}
 	else {
 		//std::cout << "location is wrong" << std::endl;
+	}
+}
+
+void Shader::parseUniform(const std::string& shaderSource) {
+	size_t uniformPos = shaderSource.find("uniform", 0);
+	while(uniformPos != std::string::npos) {
+		size_t srcEndPos = shaderSource.find(";", uniformPos + 1);
+		if (srcEndPos != std::string::npos) {
+			std::string uniformDefineStr = shaderSource.substr(uniformPos, srcEndPos - uniformPos + 1);
+			if (uniformDefineStr.find("=") == std::string::npos) {
+				size_t spacePos = uniformDefineStr.find_last_of(" ");
+				srcEndPos = uniformDefineStr.find(";");
+				if (spacePos != std::string::npos && srcEndPos != std::string::npos) {
+					std::string uniformVar = uniformDefineStr.substr(spacePos + 1, srcEndPos - spacePos - 1);
+					GLuint location = 0xffffffff;
+					mapUniformLocation.insert(std::map<std::string, GLuint>::value_type(uniformVar, location));
+				}
+			}
+		}
+		uniformPos = shaderSource.find("uniform", uniformPos + 1);
+	}
+}
+
+void Shader::initUniformLocation() {
+	std::map<std::string, GLuint>::iterator it;
+	for (it = mapUniformLocation.begin(); it != mapUniformLocation.end(); it++) {
+		GLuint location = glGetUniformLocation(shaderProgram, it->first.c_str());
+		if (location != 0xffffffff) {
+			it->second = location;
+		}
+	}
+}
+
+void Shader::setUniform1i(const std::string& varName, const int& value) const {
+	auto it = mapUniformLocation.find(varName);
+	if (it != mapUniformLocation.end()) {
+		GLuint location = mapUniformLocation.at(varName);
+		if (location != 0xffffffff) {
+			glUniform1i(location, value);
+		}
+	}
+}
+
+void Shader::setUniformMatrix4fv(const std::string& varName, const GLfloat* value) const {
+	auto it = mapUniformLocation.find(varName);
+	if (it != mapUniformLocation.end()) {
+		GLuint location = mapUniformLocation.at(varName);
+		if (location != 0xffffffff) {
+			glUniformMatrix4fv(location, 1, GL_FALSE, value);
+		}
+	}
+}
+
+void Shader::setUniform1f(const std::string& varName, const float& value) const {
+	auto it = mapUniformLocation.find(varName);
+	if (it != mapUniformLocation.end()) {
+		GLuint location = mapUniformLocation.at(varName);
+		if (location != 0xffffffff) {
+			glUniform1f(location, value);
+		}
+	}
+}
+
+void Shader::setUniform3f(const std::string& varName, const glm::vec3& value) const {
+	auto it = mapUniformLocation.find(varName);
+	if (it != mapUniformLocation.end()) {
+		GLuint location = mapUniformLocation.at(varName);
+		if (location != 0xffffffff) {
+			glUniform3f(location, value.x, value.y, value.z);
+		}
 	}
 }

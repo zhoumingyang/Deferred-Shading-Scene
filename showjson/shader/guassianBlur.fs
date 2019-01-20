@@ -20,6 +20,5 @@ void main() {
              result += texture(brightImage, vUv - vec2(0.0, tex_offset.y * i)).rgb * weight[i];
         }
     }
-	//vec3 result = texture(brightImage, vUv).rgb * weight[0];
     FragColor = vec4(result, 1.0);
 }
