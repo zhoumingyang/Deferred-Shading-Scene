@@ -34,8 +34,8 @@ public:
 	void setMeshes(const std::vector<Mesh*>& _meshes);
 	std::vector<Mesh*> getMeshes() const;
 	int getUniformLocation(const GLchar* varName);
-	void setUniform1i(const GLint& location, const int& value);
-	void setUniformMatrix4fv(const GLint& location, const GLfloat* value);
+	void setUniform1i(const GLint& location, const int& value) const ;
+	void setUniformMatrix4fv(const GLint& location, const GLfloat* value) const ;
 	void setUniform1f(const GLint& location, const float& value) const;
 	void setUniform3f(const GLint& location, const glm::vec3& value) const;
 	void setUniform1i(const std::string& varName, const int& value) const;

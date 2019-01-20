@@ -143,10 +143,15 @@ std::vector<Mesh*> Shader::getMeshes() const {
 
 
 int Shader::getUniformLocation(const GLchar* varName) {
+	auto it = mapUniformLocation.find(varName);
+	if (it != mapUniformLocation.end()) {
+		GLuint location = mapUniformLocation.at(varName);
+		return location;
+	}
 	return glGetUniformLocation(shaderProgram, varName);
 }
 
-void Shader::setUniform1i(const GLint& location, const int& value) {
+void Shader::setUniform1i(const GLint& location, const int& value) const {
 	if (location != 0xffffffff) {
 		glUniform1i(location, value);
 	}
@@ -155,7 +160,7 @@ void Shader::setUniform1i(const GLint& location, const int& value) {
 	}
 }
 
-void Shader::setUniformMatrix4fv(const GLint& location, const GLfloat* value) {
+void Shader::setUniformMatrix4fv(const GLint& location, const GLfloat* value) const {
 	if (location != 0xffffffff) {
 		glUniformMatrix4fv(location, 1, GL_FALSE, value);
 	}
