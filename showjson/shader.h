@@ -3,6 +3,7 @@
 #define SHADER_H
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -15,8 +16,10 @@ class Shader {
 private:
 	const char* pvsFileName;
 	const char* pfsFileName;
+	const char* pgsFileName;
 	GLuint shaderProgram;
 	bool readFile(std::string& outVsFile, std::string& outFsFile);
+	bool readFile(std::string& outVsFile, std::string& outFsFile, std::string& outGsFile);
 	bool doRead(std::ifstream& f, std::string& outFile);
 	std::vector<Mesh*> meshes;
 	std::map<std::string, GLuint> mapUniformLocation;
@@ -24,6 +27,7 @@ private:
 	void initUniformLocation();
 public:
 	Shader(const char* _pvsFileName, const char* _pfsFileName);
+	Shader(const char* _pvsFileName, const char* _pfsFileName, const char* _pgsFileName);
 	Shader();
 	~Shader();
 	void attachShader(const GLuint& ShaderProgram, const char* pShaderText, GLenum ShaderType);

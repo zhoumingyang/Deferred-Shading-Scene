@@ -4,7 +4,7 @@
 #include "model.h"
 #include "vao.h"
 #include "ibo.h"
-#include "texture.h"
+#include "texture2D.h"
 #include "shapegeometry.h"
 #include <Importer.hpp>
 #include <scene.h>
@@ -40,7 +40,7 @@ private:
 	VBO* pUvBuffer;
 	VBO* pNormalBuffer;
 	IBO* pIbo;
-	Texture* pTexture;
+	Texture2D* pTexture;
 	Shader* pShader;
 	glm::mat4 modelMat;
 	glm::mat4 normalMat;
@@ -66,7 +66,7 @@ public:
 	VBO* getUvBuffer() const;
 	VBO* getNormalBuffer() const;
 	IBO* getIndicesBuffer() const;
-	Texture* getTexture() const;
+	Texture2D* getTexture() const;
 	Shader* getShader() const;
 	glm::mat4 getModelMatrix() const;
 	glm::mat4 getNormalMatrix() const;

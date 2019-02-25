@@ -20,7 +20,7 @@ void setVertexAttribute(const Json::Value& vertexInfos, std::vector<glm::vec2>& 
 }
 
 FileParse::FileParse() {
-	fileName = "./design/buffer.json";
+	fileName = "./design/scene-oneroom.json";
 }
 
 FileParse::FileParse(const std::string& fn) {
@@ -150,6 +150,10 @@ bool FileParse::doFileParse() {
 		for (int p = 0; p < meshes.size(); p++) {
 			Model model;
 			auto child = meshes[p];
+			if (child[JSON_MESH_NAME].asString() == "Ceiling" 
+				|| child[JSON_MESH_NAME].asString() == "WallOuter") {
+				continue;
+			}
 			matrix = createMatrix(child, true, false);
 			normalMatrix = createMatrix(child, false, true);
 			model = parseMeshChild(child);

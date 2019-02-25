@@ -3,7 +3,7 @@
 #define G_BUFFER
 #include "fbo.h"
 #include "renderbuffer.h"
-#include "texture.h"
+#include "texture2D.h"
 
 class GeometryBuffer {
 private:

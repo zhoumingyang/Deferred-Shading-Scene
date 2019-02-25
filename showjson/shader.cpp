@@ -13,6 +13,12 @@ Shader::Shader(const char* _pvsFileName, const char* _pfsFileName) {
 	}
 }
 
+Shader::Shader(const char* _pvsFileName, const char* _pfsFileName, const char* _pgsFileName) {
+	pvsFileName = _pvsFileName;
+	pfsFileName = _pfsFileName;
+	pgsFileName = _pgsFileName;
+}
+
 Shader::Shader() {
 	pvsFileName = pVSFileNameDefault;
 	pfsFileName = pFSFileNameDefault;
@@ -21,6 +27,7 @@ Shader::Shader() {
 Shader::~Shader() {
 	pvsFileName = NULL;
 	pfsFileName = NULL;
+	pgsFileName = NULL;
 	if (shaderProgram == 0xffffffff) {
 		glDeleteProgram(shaderProgram);
 	}
@@ -55,6 +62,32 @@ bool Shader::readFile(std::string& outVsFile, std::string& outFsFile) {
 	return ret;
 }
 
+bool Shader::readFile(std::string& outVsFile, std::string& outFsFile, std::string& outGsFile) {
+	bool bvs = true, bfs = true, bgs = true;
+	if (pvsFileName != NULL) {
+		std::ifstream f0(pvsFileName);
+		if (!doRead(f0, outVsFile)) {
+			bvs = false;
+			std::cout << "vertex shader file read fail" << std::endl;
+		}
+	}
+	if (pfsFileName != NULL) {
+		std::ifstream f1(pfsFileName);
+		if (!doRead(f1, outFsFile)) {
+			bfs = false;
+			std::cout << "fragment shader file read fail" << std::endl;
+		}
+	}
+	if (pgsFileName != NULL) {
+		std::ifstream f2(pgsFileName);
+		if (!doRead(f2, outGsFile)) {
+			bfs = false;
+			std::cout << "geometry shader file read fail" << std::endl;
+		}
+	}
+	return bvs || bfs || bgs;
+}
+
 void Shader::attachShader(const GLuint& ShaderProgram, const char* pShaderText, GLenum ShaderType) {
 	GLuint ShaderObj = glCreateShader(ShaderType);
 	if (ShaderObj == 0) {
@@ -86,16 +119,23 @@ void Shader::compileShader() {
 		getchar();
 		exit(1);
 	}
-	std::string vs, fs;
-	if (!readFile(vs, fs)) {
+	std::string vs, fs, gs;
+	if (!readFile(vs, fs, gs)) {
 		exit(1);
 	}
 
-	parseUniform(vs);
-	parseUniform(fs);
-
-	attachShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
-	attachShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+	if (vs.size()) {
+		parseUniform(vs);
+		attachShader(shaderProgram, vs.c_str(), GL_VERTEX_SHADER);
+	}
+	if (fs.size()) {
+		parseUniform(fs);
+		attachShader(shaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+	}
+	if (gs.size()) {
+		parseUniform(gs);
+		attachShader(shaderProgram, gs.c_str(), GL_GEOMETRY_SHADER);
+	}
 
 	GLint success = 0;
 	GLchar ErrorLog[1024] = { 0 };
@@ -188,18 +228,41 @@ void Shader::setUniform3f(const GLint& location, const glm::vec3& value) const {
 }
 
 void Shader::parseUniform(const std::string& shaderSource) {
-	size_t uniformPos = shaderSource.find("uniform", 0);
-	while(uniformPos != std::string::npos) {
-		size_t srcEndPos = shaderSource.find(";", uniformPos + 1);
+	const std::string uniform = "uniform";
+	const std::string arrayLeftSymbol = "[";
+	const std::string arrayRightSymbol = "]";
+	const std::string space = " ";
+	const std::string semicolon = ";";
+	const std::string equal = "=";
+
+	size_t uniformPos = shaderSource.find(uniform, 0);
+	while (uniformPos != std::string::npos) {
+		size_t srcEndPos = shaderSource.find(semicolon, uniformPos + 1);
 		if (srcEndPos != std::string::npos) {
 			std::string uniformDefineStr = shaderSource.substr(uniformPos, srcEndPos - uniformPos + 1);
-			if (uniformDefineStr.find("=") == std::string::npos) {
-				size_t spacePos = uniformDefineStr.find_last_of(" ");
-				srcEndPos = uniformDefineStr.find(";");
+			if (uniformDefineStr.find(equal) == std::string::npos) {
+				size_t spacePos = uniformDefineStr.find_last_of(space);
+				srcEndPos = uniformDefineStr.find(semicolon);
 				if (spacePos != std::string::npos && srcEndPos != std::string::npos) {
 					std::string uniformVar = uniformDefineStr.substr(spacePos + 1, srcEndPos - spacePos - 1);
 					GLuint location = 0xffffffff;
-					mapUniformLocation.insert(std::map<std::string, GLuint>::value_type(uniformVar, location));
+					size_t arrayLeft = uniformVar.find(arrayLeftSymbol, 0);
+					size_t arrayRight = uniformVar.find(arrayRightSymbol, 0);
+					if (arrayLeft != std::string::npos && arrayRight != std::string::npos) {
+						std::string uniformVarName = uniformVar.substr(0, arrayLeft);
+						std::string numStr = uniformVar.substr(arrayLeft+1, arrayRight - arrayLeft - 1);
+						int num = 0;
+						std::stringstream ss;
+						ss << numStr;
+						ss >> num;
+						for (int i = 0; i < num; i++) {
+							std::string newUniformVar = uniformVarName + arrayLeftSymbol + std::to_string(i) + arrayRightSymbol;
+							mapUniformLocation.insert(std::map<std::string, GLuint>::value_type(newUniformVar, location));
+						}
+					}
+					else {
+						mapUniformLocation.insert(std::map<std::string, GLuint>::value_type(uniformVar, location));
+					}
 				}
 			}
 		}

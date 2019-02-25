@@ -7,9 +7,9 @@ GeometryBuffer::GeometryBuffer() {
 	normalRbo = new RenderBuffer(GL_COLOR_ATTACHMENT2);
 	depthRbo = new RenderBuffer(GL_DEPTH_ATTACHMENT);
 
-	diffuseTex = new Texture();
-	positionTex = new Texture();
-	normalTex = new Texture();
+	diffuseTex = new Texture2D();
+	positionTex = new Texture2D();
+	normalTex = new Texture2D();
 }
 
 GeometryBuffer::~GeometryBuffer() {

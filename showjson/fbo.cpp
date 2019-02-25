@@ -1,7 +1,7 @@
 #include "fbo.h"
 
-const unsigned int WINDOW_WIDTH = 1024;
-const unsigned int WINDOW_HEIGHT = 760;
+const unsigned int WINDOW_WIDTH = 1280;
+const unsigned int WINDOW_HEIGHT = 720;
 
 FBO::FBO(const int& _count) {
 	count = _count;
@@ -56,8 +56,9 @@ FBO::FBO(const float& _width, const float& _height) {
 }
 
 FBO::~FBO() {
-	glDeleteFramebuffers(count, fbos);
-	if (fbos) {
+	if (fbos != NULL) {
+		unBind();
+		glDeleteFramebuffers(count, fbos);
 		delete[] fbos;
 		fbos = NULL;
 	}
@@ -105,9 +106,19 @@ void FBO::attachRenderBuffer(const RenderBuffer& renderBuffer, const int& index)
 		GL_RENDERBUFFER, renderBuffer.getRenderObjectByIndex(index));
 }
 
-void FBO::attachTexture(const Texture& texture, const GLenum& attachPoint, const int& textureIndex) const {
-	texture.setOridinaryTexParam();
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachPoint, GL_TEXTURE_2D, texture.getTexObjectByIndex(textureIndex), 0);
+void FBO::attachTexture(const Texture2D& texture, const GLenum& attachPoint, const int& textureIndex, const bool& setOridinary) const {
+	if (setOridinary) {
+		texture.setOridinaryTexParam();
+	}
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, attachPoint, GL_TEXTURE_2D, texture.getTexObjectByIndex(textureIndex), 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, attachPoint, texture.getTexObjectByIndex(textureIndex), 0);
+}
+
+void FBO::attachTexture(const Texture& texture, const GLenum& attachPoint, const int& textureIndex, const bool& setOridinary) const {
+	if (setOridinary) {
+		texture.setOridinaryTexParam();
+	}
+	glFramebufferTexture(GL_FRAMEBUFFER, attachPoint, texture.getTexObjectByIndex(textureIndex), 0);
 }
 
 void FBO::frameBufferStatusCheck() const {

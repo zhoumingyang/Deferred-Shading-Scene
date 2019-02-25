@@ -20,9 +20,11 @@ VBO::VBO(const int& _count) {
 
 VBO::~VBO() {
 	if (vbos != NULL) {
+		unBind();
 		glDeleteBuffers(count, vbos);
+		delete[] vbos;
+		vbos = NULL;
 		count = 0;
-		delete vbos;
 	}
 }
 

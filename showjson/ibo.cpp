@@ -20,10 +20,12 @@ IBO::IBO(const int& _count) {
 
 IBO::~IBO() {
 	if (ibos != NULL) {
+		unBind();
 		glDeleteBuffers(count, ibos);
-		count = 0;
-		delete ibos;
+		delete[] ibos;
+		ibos = NULL;
 	}
+	count = 0;
 }
 
 void IBO::setElementData(const int& index, const GLvoid* data, GLsizeiptr size) const {

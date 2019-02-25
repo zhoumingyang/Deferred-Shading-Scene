@@ -185,7 +185,7 @@ void Mesh::initTexture() {
 			return;
 		}
 		GLenum format = image->getImageComponents();
-		pTexture = new Texture();
+		pTexture = new Texture2D();
 		pTexture->bind(0);
 		pTexture->setTextureData(0, image->getImageData(), format, image->getWidth(), image->getHeight(), format);
 		pTexture->setWrapMode(GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -211,6 +211,7 @@ void Mesh::render() {
 		pVao->bind(i);
 		pIbo->bind(i);
 		glDrawElements(GL_TRIANGLES, meshUnits[i].indices.size(), GL_UNSIGNED_INT, 0);
+		pIbo->unBind();
 		pVao->unBind();
 	}
 	if (pShader != NULL) {
@@ -238,7 +239,7 @@ IBO* Mesh::getIndicesBuffer() const {
 	return pIbo;
 }
 
-Texture* Mesh::getTexture() const {
+Texture2D* Mesh::getTexture() const {
 	return pTexture;
 }
 

@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "renderbuffer.h"
+#include "texture2D.h"
 #include "texture.h"
 #pragma comment(lib,"glew32.lib")
 #define MAXFRAMETROBJECTS 1000
@@ -32,7 +33,8 @@ public:
 	float getFrameWidthByIndex(const int& index) const;
 	float getFrameHeightByIndex(const int& index) const;
 	void attachRenderBuffer(const RenderBuffer& renderBuffer, const int& index = 0) const;
-	void attachTexture(const Texture& texture, const GLenum& attachPoint, const int& textureIndex = 0) const;
+	void attachTexture(const Texture2D& texture, const GLenum& attachPoint, const int& textureIndex = 0, const bool& setOridinary = true) const;
+	void attachTexture(const Texture& texture, const GLenum& attachPoint, const int& textureIndex = 0, const bool& setOridinary = true) const;
 	void frameBufferStatusCheck() const;
 };
 #endif // !FBO_H

@@ -12,35 +12,48 @@
 #include "shapegeometry.h"
 #include "sphere.h"
 #include "rectangle.h"
+#include "texturecube.h"
 #define MAXMESHNUMBER 1000
 #define ORIDINARY_RENDER 1
 #define DEFFERED_RENDER 2
 #define BLOOM_RENDER 3
 #define RENDER_CLEAR 4
 #define RENDER_START 5
+#define SHADOW_RENDER 6
 
 bool oridinaryRender = false;
 bool defferedRender = true;
 bool bloomRender = false;
+bool shadowRender = false;
 
-const unsigned int WINDOW_WIDTH = 1024;
-const unsigned int WINDOW_HEIGHT = 760;
+const unsigned int WINDOW_WIDTH = 1280;
+const unsigned int WINDOW_HEIGHT = 720;
+
+const unsigned int SHADOW_WIDTH = 1024;
+const unsigned int SHADOW_HEIGHT = 1024;
 
 //oridinary render
-const char* pVSFileName = "./shader/showjson.vs";
-const char* pFSFileName = "./shader/showjson.fs";
+const char* pVSFileName = "./shader/showjson.vert";
+const char* pFSFileName = "./shader/showjson.frag";
 //deferred render
-const char* pGvsFileName = "./shader/renderToGbuffer.vs";
-const char* pGfsFileName = "./shader/renderToGbuffer.fs";
-const char* pWvsFileName = "./shader/renderToWindow.vs";
-const char* pWfsFileName = "./shader/renderToWindow.fs";
+const char* pGvsFileName = "./shader/renderToGbuffer.vert";
+const char* pGfsFileName = "./shader/renderToGbuffer.frag";
+const char* pWvsFileName = "./shader/renderToWindow.vert";
+const char* pWfsFileName = "./shader/renderToWindow.frag";
 //bloom render
-const char* pFvsFileName = "./shader/renderToFbuffer.vs";
-const char* pFfsFileName = "./shader/renderToFbuffer.fs";
-const char* pBlurvsFileName = "./shader/gaussianBlur.vs";
-const char* pBlurfsFileName = "./shader/guassianBlur.fs";
-const char* pFinalvsFileName = "./shader/renderFinal.vs";
-const char* pFinalfsFileName = "./shader/renderFinal.fs";
+const char* pFvsFileName = "./shader/renderToFbuffer.vert";
+const char* pFfsFileName = "./shader/renderToFbuffer.frag";
+const char* pBlurvsFileName = "./shader/gaussianBlur.vert";
+const char* pBlurfsFileName = "./shader/guassianBlur.frag";
+const char* pFinalvsFileName = "./shader/renderFinal.vert";
+const char* pFinalfsFileName = "./shader/renderFinal.frag";
+//shadow depth
+const char* pSdvsFileName = "./shader/shadowDepth.vert";
+const char* pSdgsFileName = "./shader/shadowDepth.geom";
+const char* pSdfsFileName = "./shader/shadowDepth.frag";
+//shadow render
+const char* pSvsFileName = "./shader/renderShadow.vert";
+const char* pSfsFileName = "./shader/renderShadow.frag";
 
 std::vector<Model> models;
 /***************************camera********************************/
@@ -65,6 +78,8 @@ Shader* renderWindow;
 Shader* renderFBuffer;
 Shader* renderBlur;
 Shader* renderFinal;
+Shader* shadowDepth;
+Shader* renderShadow;
 
 /*************************all lights**********************************/
 glm::vec3 spotLightPosition(0.0, 100.0, 0.0);
@@ -86,9 +101,14 @@ FBO* renderFBO;
 Texture* colorTexture;
 FBO* blurFBO;
 Texture* blurTexture;
+FBO *shadowDepthFBO;
+Texture* shadowDepthTexture;
 
 //quad mesh
 Mesh* quaMesh;
+
+float nearPlane = 1.0f;
+float farPlane = 10000.0f;//150.0f;
 
 void renderStandarLine() {
 	glLoadIdentity();
@@ -152,24 +172,46 @@ void clear() {
 		renderOridinary = NULL;
 	}
 	if (renderGBuffer != NULL) {
+		std::vector<Mesh*> pMesh = renderGBuffer->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
 		delete renderGBuffer;
 		renderGBuffer = NULL;
 	}
 	if (renderWindow != NULL) {
+		std::vector<Mesh*> pMesh = renderWindow->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
 		delete renderWindow;
 		renderWindow = NULL;
 	}
 	if (renderFBuffer != NULL) {
+		std::vector<Mesh*> pMesh = renderFBuffer->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
 		delete renderFBuffer;
 		renderFBuffer = NULL;
 	}
 	if (renderBlur != NULL) {
+		std::vector<Mesh*> pMesh = renderBlur->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
 		delete renderBlur;
 		renderBlur = NULL;
 	}
 	if (renderFinal != NULL) {
+		std::vector<Mesh*> pMesh = renderFinal->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
 		delete renderFinal;
 		renderFinal = NULL;
+	}
+	if (shadowDepth) {
+		std::vector<Mesh*> pMesh = shadowDepth->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
+		delete shadowDepth;
+		shadowDepth = NULL;
+	}
+	if (renderShadow) {
+		std::vector<Mesh*> pMesh = renderShadow->getMeshes();
+		std::vector<Mesh*>().swap(pMesh);
+		delete renderShadow;
+		renderShadow = NULL;
 	}
 
 	for (int i = 0; i < prleLights.size(); i++) {
@@ -196,7 +238,6 @@ void clear() {
 	std::vector<PointLight*>().swap(pointLights);
 	std::vector<SpotLight*>().swap(spotLights);
 
-	std::vector<ShapeGeometry*> lightSpheres;
 	for (int i = 0; i < lightSpheres.size(); i++) {
 		if (lightSpheres[i] != NULL) {
 			delete lightSpheres[i];
@@ -227,6 +268,14 @@ void clear() {
 	if (blurTexture != NULL) {
 		delete blurTexture;
 		blurTexture = NULL;
+	}
+	if (shadowDepthFBO != NULL) {
+		delete shadowDepthFBO;
+		shadowDepthFBO = NULL;
+	}
+	if (shadowDepthTexture != NULL) {
+		delete shadowDepthTexture;
+		shadowDepthTexture = NULL;
 	}
 }
 
@@ -260,6 +309,8 @@ void testShowMultiModelGL(FileParse* p) {
 	}
 	renderOridinary->setMeshes(pMesh);
 	renderGBuffer->setMeshes(pMesh);
+	shadowDepth->setMeshes(pMesh);
+	renderShadow->setMeshes(pMesh);
 }
 
 void initUniformLocation() {
@@ -290,6 +341,12 @@ void initUniformLocation() {
 			pointLights[i]->initUniformLocation(*renderFBuffer, i);
 		}
 	}
+	if (renderShadow) {
+		//only consider point light
+		for (int i = 0; i < pointLights.size(); i++) {
+			pointLights[i]->initUniformLocation(*renderShadow, i);
+		}
+	}
 }
 
 void initLight() {
@@ -302,12 +359,20 @@ void initLight() {
 
 	//point light
 	lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	diffuse = 5.0f;
+	diffuse = shadowRender ? 50.0f : 6.0f;
 	LightAttenuation attenuation(1.0f, 0.5f, 0.0f);
-	for (int i = 0; i < 9; i++) {
-		for (int j = 0; j < 9; j++) {
-			glm::vec3 tmpPosition = glm::vec3(-400 + drand48() * 1600, 60, -400 + drand48() * 800);
-			lightColor = glm::vec3(drand48(), drand48(), drand48());
+	int lightNumber = shadowRender ? 1 : 6;       //now in shadow mode we render just one point light
+	for (int i = 0; i < lightNumber; i++) {
+		for (int j = 0; j < lightNumber; j++) {
+			glm::vec3 tmpPosition;
+			if (shadowRender) {
+				tmpPosition = glm::vec3(drand48() * 30, 60, drand48() * 30);
+				lightColor = glm::vec3(1.0, 1.0, 1.0);
+			}
+			else {
+				tmpPosition = glm::vec3(-400 + drand48() * 1600, 60, -400 + drand48() * 800);
+				lightColor = glm::vec3(drand48(), drand48(), drand48());
+			}
 			PointLight* pLight = new PointLight(tmpPosition, attenuation, lightColor, ambient, diffuse);
 			pointLights.push_back(pLight);
 			ShapeGeometry* tmpShape = new Sphere();
@@ -336,11 +401,13 @@ void initCamera() {
 
 void initOptionEnable() {
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_POLYGON_SMOOTH);
 	glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
-	glDisable(GL_CULL_FACE);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glPolygonMode(GL_FRONT, GL_FILL);
 
 	GLint iMultiSample = 0;
 	GLint iNumSamples = 0;
@@ -356,7 +423,7 @@ void initOptionDisable() {
 }
 
 void initGL() {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	//shader init
 	//oridinary
 	renderOridinary = new Shader(pVSFileName, pFSFileName);
@@ -373,6 +440,12 @@ void initGL() {
 	renderBlur->compileShader();
 	renderFinal = new Shader(pFinalvsFileName, pFinalfsFileName);
 	renderFinal->compileShader();
+	//shadow depth
+	shadowDepth = new Shader(pSdvsFileName, pSdfsFileName, pSdgsFileName);
+	shadowDepth->compileShader();
+	//shadow render
+	renderShadow = new Shader(pSvsFileName, pSfsFileName);
+	renderShadow->compileShader();
 
 	//scene init
 	initLight();
@@ -387,7 +460,7 @@ void initGL() {
 	initUniformLocation();
 
 	//init vao & vbo & texture
-	FileParse* p = new FileParse("./design/scene-oneroom.json");
+	FileParse* p = new FileParse("./design/scene-geometry.json");
 	if (!p->doFileParse()) {
 		delete p;
 		return;
@@ -403,9 +476,10 @@ void initGL() {
 	}
 	gBuffer->initGbuffer();
 
+	//for bloom render - render to bright image and diffuse image in frame buffer
 	renderFBO = new FBO();
 	renderFBO->bind(0);
-	colorTexture = new Texture(2);
+	colorTexture = new Texture2D(2);
 	for (int i = 0; i < 2; i++) {
 		colorTexture->bind(i);
 		colorTexture->setTextureData(i, NULL, GL_RGB16F, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGB, GL_FLOAT);
@@ -416,8 +490,9 @@ void initGL() {
 	renderFBO->frameBufferStatusCheck();
 	renderFBO->unBind();
 
+	//for bloom render - blur bright image use gaussian blur
 	blurFBO = new FBO(2);
-	blurTexture = new Texture(2);
+	blurTexture = new Texture2D(2);
 	for (int i = 0; i < 2; i++) {
 		blurFBO->bind(i);
 		blurTexture->bind(i);
@@ -427,6 +502,26 @@ void initGL() {
 		blurTexture->unBind();
 		blurFBO->unBind();
 	}
+
+	//shadow render - shadow depth texture attach to a frame buffer
+	shadowDepthFBO = new FBO();
+	shadowDepthFBO->bind(0);
+	shadowDepthTexture = new TextureCube();
+	shadowDepthTexture->bind(0);
+	for (int i = 0; i < 6; i++) {
+		shadowDepthTexture->setTextureData(i, NULL, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, GL_DEPTH_COMPONENT, GL_FLOAT);
+		//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	shadowDepthTexture->setFilterMode(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	shadowDepthTexture->setFilterMode(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	shadowDepthTexture->setWrapMode(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	shadowDepthTexture->setWrapMode(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	shadowDepthTexture->setWrapMode(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+	shadowDepthFBO->attachTexture(*shadowDepthTexture, GL_DEPTH_ATTACHMENT, 0, false);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	shadowDepthFBO->frameBufferStatusCheck();
+	shadowDepthFBO->unBind();
 
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR) {
@@ -445,26 +540,18 @@ void multiRenderGBuffer(const Camera& camera) {
 			glm::mat4 normalMat = pMesh[i]->getNormalMatrix();
 			glm::vec3 tmpColor = pMesh[i]->getColor();
 			MVP = camera.getProjectViewModelMat(pMesh[i]->getModelMatrix());
-			/*renderGBuffer->setUniform1i(gTexLocation, 0);
-			renderGBuffer->setUniformMatrix4fv(gMvpLocation, &MVP[0][0]);
-			renderGBuffer->setUniformMatrix4fv(gWorldMatrixLocation, &worldMat[0][0]);
-			renderGBuffer->setUniformMatrix4fv(gNormalMatrixLocation, &normalMat[0][0]);
-			renderGBuffer->setUniform3f(gSphereColorLocation, tmpColor);*/
 			renderGBuffer->setUniform1i("tex", 0);
 			renderGBuffer->setUniformMatrix4fv("mvp", &MVP[0][0]);
 			renderGBuffer->setUniformMatrix4fv("worldMatrix", &worldMat[0][0]);
 			renderGBuffer->setUniformMatrix4fv("normalMatrix", &normalMat[0][0]);
 			renderGBuffer->setUniform3f("lightSphereColor", tmpColor);
 			if (pMesh[i]->getMeshType() == NORMALMESH && pMesh[i]->getTexture() != NULL) {
-				//renderGBuffer->setUniform1i(gIsMapLocation, 1);
 				renderGBuffer->setUniform1i("isMap", 1);
 			}
 			else if (pMesh[i]->getMeshType() == OBJMESH) {
-				//renderGBuffer->setUniform1i(gIsMapLocation, 0);
 				renderGBuffer->setUniform1i("isMap", 0);
 			}
 			else if (pMesh[i]->getMeshType() == AIDMESH) {
-				//renderGBuffer->setUniform1i(gIsMapLocation, 2);
 				renderGBuffer->setUniform1i("isMap", 2);
 			}
 			pMesh[i]->render();
@@ -517,7 +604,7 @@ void multiRenderWindow() {
 	gBuffer->activePositionTexture(1, 0);
 	renderWindow->setUniform1i("tPosition", 1);
 	gBuffer->activeNormalTexture(2, 0);
-	renderWindow->setUniform1i("tNormal",2);
+	renderWindow->setUniform1i("tNormal", 2);
 	quaMesh->render();
 	gBuffer->deactiveDiffuseTexture(0, 0);
 	gBuffer->deactivePositionTexture(1, 0);
@@ -568,6 +655,65 @@ void multiRenderOridinary(const Camera& camera) {
 			pMesh[i]->render();
 		}
 	}
+}
+
+void mutiRenderShadowDepth(std::vector<glm::mat4> lightSpaceMatrix) {
+	for (int i = 0; i < 6; i++) {
+		const std::string varName = "shadowMatrices[" + std::to_string(i) + "]";
+		shadowDepth->setUniformMatrix4fv(varName, &lightSpaceMatrix[i][0][0]);
+	}
+	glm::vec3 lightPos = pointLights[0]->getPosition();
+	shadowDepth->setUniform3f("lightPos", lightPos);
+	shadowDepth->setUniform1f("far_plane", farPlane);
+	std::vector<Mesh*> pMesh = shadowDepth->getMeshes();
+	for (int i = 0; i < pMesh.size(); i++) {
+		if (pMesh[i] != NULL) {
+			glm::mat4 worldMat = pMesh[i]->getModelMatrix();
+			shadowDepth->setUniformMatrix4fv("worldMatrix", &worldMat[0][0]);
+			pMesh[i]->render();
+		}
+	}
+}
+
+void mutiRenderShadowWindow() {
+	std::vector<Mesh*> pMesh = renderShadow->getMeshes();
+	if (pointLights.size() > 0) {
+		for (int i = 0; i < pointLights.size(); i++) {
+			pointLights[i]->setAllUniformParams(*renderShadow);
+		}
+	}
+	renderShadow->setUniform1f("farPlane", farPlane);
+	renderShadow->setUniform1f("specular", 1.0);
+	renderShadow->setUniform1f("specualrPower", 1.0);
+	renderShadow->setUniform3f("eyeWorldPos", eye);
+	renderShadow->setUniform1i("numPointLight", pointLights.size());
+	renderShadow->setUniform1i("shadowMap", 1);
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	shadowDepthTexture->bind(0);
+	int aidCount = 0;
+	for (int i = 0; i < pMesh.size(); i++) {
+		if (pMesh[i] != NULL) {
+			glm::mat4 worldMat = pMesh[i]->getModelMatrix();
+			glm::mat4 normalMat = pMesh[i]->getNormalMatrix();
+			MV = camera.getModelViewMat(pMesh[i]->getModelMatrix());
+			MVP = camera.getProjectViewModelMat(pMesh[i]->getModelMatrix());
+			renderShadow->setUniform1i("tex", 0);
+			renderShadow->setUniform1i("depthMap", 1);
+			renderShadow->setUniformMatrix4fv("mvp", &MVP[0][0]);
+			renderShadow->setUniformMatrix4fv("worldMatrix", &worldMat[0][0]);
+			renderShadow->setUniformMatrix4fv("normalMatrix", &normalMat[0][0]);
+			if (pMesh[i]->getMeshType() == NORMALMESH) {
+				renderShadow->setUniform1i("texMap", 1);
+			}
+			else {
+				renderShadow->setUniform1i("texMap", 0);
+			}
+			pMesh[i]->render();
+		}
+	}
+	glDisable(GL_TEXTURE_CUBE_MAP);
+	shadowDepthTexture->unBind();
 }
 
 void renderGL() {
@@ -656,13 +802,44 @@ void renderGL() {
 		colorTexture->unBind();
 		renderFinal->unuse();
 	}
+	else if (shadowRender) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glm::mat4 lightProj = glm::perspective(glm::radians(60.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, nearPlane, farPlane);
+		std::vector<glm::mat4> lightSpaceMatrix;
+		for (int i = 0; i < pointLights.size(); i++) {
+			PointLight* ptl = pointLights[i];
+			glm::vec3 lightPos = ptl->getPosition();
+			lightSpaceMatrix.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			lightSpaceMatrix.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			lightSpaceMatrix.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+			lightSpaceMatrix.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+			lightSpaceMatrix.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+			lightSpaceMatrix.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		}
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		shadowDepthFBO->bind(0);
+		shadowDepthFBO->frameBufferStatusCheck();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		shadowDepth->use();
+		glCullFace(GL_FRONT);
+		mutiRenderShadowDepth(lightSpaceMatrix);
+		glCullFace(GL_BACK);
+		shadowDepth->unuse();
+		shadowDepthFBO->unBind();
+
+		glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderShadow->use();
+		mutiRenderShadowWindow();
+		renderShadow->unuse();
+	}
 	else {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	//draw standar line
-	//initOptionDisable();
-	//renderStandarLine();
+	initOptionDisable();
+	renderStandarLine();
 	glutSwapBuffers();
 	glutPostRedisplay();
 }
@@ -727,32 +904,59 @@ void processKeyDownEvent(unsigned char key, int x, int y) {
 }
 
 void processRightMenuEvents(int option) {
+	if (shadowRender && 
+		(option == ORIDINARY_RENDER || option == DEFFERED_RENDER || option == BLOOM_RENDER) ) {
+		clear();
+	}
+
 	switch (option) {
 	case ORIDINARY_RENDER:
 		oridinaryRender = true;
 		defferedRender = false;
 		bloomRender = false;
+		if (shadowRender) {
+			shadowRender = false;
+			initGL();
+		}
 		break;
 	case DEFFERED_RENDER:
 		oridinaryRender = false;
 		defferedRender = true;
 		bloomRender = false;
+		if (shadowRender) {
+			shadowRender = false;
+			initGL();
+		}
 		break;
 	case BLOOM_RENDER:
 		oridinaryRender = false;
 		defferedRender = false;
 		bloomRender = true;
+		if (shadowRender) {
+			shadowRender = false;
+			initGL();
+		}
+		break;
+	case SHADOW_RENDER:
+		oridinaryRender = false;
+		defferedRender = false;
+		bloomRender = false;
+		shadowRender = true;
+		clear();
+		initGL();
 		break;
 	case RENDER_CLEAR:
 		oridinaryRender = false;
 		defferedRender = false;
 		bloomRender = false;
+		shadowRender = false;
 		clear();
 		break;
 	case RENDER_START:
 		oridinaryRender = false;
 		defferedRender = true;
 		bloomRender = false;
+		shadowRender = false;
 		clear();
 		initGL();
 		break;
@@ -760,6 +964,7 @@ void processRightMenuEvents(int option) {
 		oridinaryRender = false;
 		defferedRender = true;
 		bloomRender = false;
+		shadowRender = false;
 	}
 	glutPostRedisplay();
 }
@@ -770,6 +975,7 @@ void createRightMenu() {
 	glutAddMenuEntry("forward rendering", ORIDINARY_RENDER);
 	glutAddMenuEntry("deffered rendering", DEFFERED_RENDER);
 	glutAddMenuEntry("bloom rendering", BLOOM_RENDER);
+	glutAddMenuEntry("shadow rendering", SHADOW_RENDER);
 	glutAddMenuEntry("rendering clear", RENDER_CLEAR);
 	glutAddMenuEntry("rendering start", RENDER_START);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);

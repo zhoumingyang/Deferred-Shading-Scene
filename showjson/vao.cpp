@@ -20,8 +20,10 @@ VAO::VAO(const int& _count) {
 
 VAO::~VAO() {
 	if (vaos != NULL) {
+		unBind();
 		glDeleteVertexArrays(count, vaos);
-		delete vaos;
+		delete[] vaos;
+		vaos = NULL;
 		count = 0;
 	}
 }
