@@ -2,8 +2,10 @@
 #ifndef VAO_H
 #define VAO_H
 #include <iostream>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #include "vbo.h"
 #pragma comment(lib,"glew32.lib")
 #define MAXARRAYTROBJECTS 1000

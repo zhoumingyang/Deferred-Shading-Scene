@@ -13,6 +13,10 @@
 #include "sphere.h"
 #include "rectangle.h"
 #include "texturecube.h"
+#include "ray.h"
+#include "box3math.h"
+#include "spheremath.h"
+#include "trianglemath.h"
 #define MAXMESHNUMBER 1000
 #define ORIDINARY_RENDER 1
 #define DEFFERED_RENDER 2
@@ -371,7 +375,8 @@ void initLight() {
 			}
 			else {
 				tmpPosition = glm::vec3(-400 + drand48() * 1600, 60, -400 + drand48() * 800);
-				lightColor = glm::vec3(drand48(), drand48(), drand48());
+				//lightColor = glm::vec3(drand48(), drand48(), drand48());
+				lightColor = glm::vec3(1.0, 1.0, 1.0);
 			}
 			PointLight* pLight = new PointLight(tmpPosition, attenuation, lightColor, ambient, diffuse);
 			pointLights.push_back(pLight);
@@ -460,7 +465,7 @@ void initGL() {
 	initUniformLocation();
 
 	//init vao & vbo & texture
-	FileParse* p = new FileParse("./design/scene-geometry.json");
+	FileParse* p = new FileParse("./design/scene-intersect.json");
 	if (!p->doFileParse()) {
 		delete p;
 		return;
@@ -510,7 +515,6 @@ void initGL() {
 	shadowDepthTexture->bind(0);
 	for (int i = 0; i < 6; i++) {
 		shadowDepthTexture->setTextureData(i, NULL, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, GL_DEPTH_COMPONENT, GL_FLOAT);
-		//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	}
 	shadowDepthTexture->setFilterMode(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	shadowDepthTexture->setFilterMode(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -735,6 +739,7 @@ void renderGL() {
 
 		//deferred render to window
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 		renderWindow->use();
 		multiRenderWindow();
 		renderWindow->unuse();
@@ -844,10 +849,84 @@ void renderGL() {
 	glutPostRedisplay();
 }
 
+bool doPickObject(int x, int y) {
+	//viewport space to ndc space
+	float nx = (2.0f * float(x)) / float(WINDOW_WIDTH) - 1.0f;
+	float ny = 1.0f - (2.0f * float(y)) / float(WINDOW_HEIGHT);
+	float nz = 1.0f;
+	glm::vec3 ver_ndc = glm::vec3(nx, ny, nz);
+
+	//ndc space to clip space
+	glm::vec4 ver_clip = glm::vec4(ver_ndc.x, ver_ndc.y, -1.0, 1.0);
+
+	//clip space to eye space
+	glm::mat4 projectMat4 = camera.getProjectMat();
+	glm::mat4 inverseProjectMat4 = glm::inverse(projectMat4);
+	glm::vec4 ver_eye = inverseProjectMat4 * ver_clip;
+	ver_eye = glm::vec4(ver_eye.x, ver_eye.y, -1.0, 0.0);
+
+	//eye space to world space
+	glm::mat4 viewMat4 = camera.getViewMat();
+	glm::mat4 inverseViewMat4 = glm::inverse(viewMat4);
+	glm::vec4 ver_world = inverseViewMat4 * ver_eye;
+	ver_world = glm::normalize(ver_world);
+	glm::vec3 rayDir = glm::vec3(ver_world.x, ver_world.y, ver_world.z);
+
+	//test intersect
+	glm::vec3 rayOrigin = camera.getView().eye;
+	Ray ray = Ray(rayOrigin, rayDir);
+	std::vector<Mesh*> pMesh = renderGBuffer->getMeshes();
+	if (pMesh.size() > 0) {
+		SphereMath sphereBounding;
+		Box3Math box3Bounding;
+		for (int i = 0; i < pMesh.size(); i++) {
+			MeshType meshType = pMesh[i]->getMeshType();
+			if (meshType == OBJMESH) {
+				std::vector<MeshUnit> meshDatas = pMesh[i]->getMeshUnits();
+				//world space to model space
+				glm::mat4 worldMat = pMesh[i]->getModelMatrix();
+				Ray tmpRay = Ray(rayOrigin, rayDir);
+				glm::mat4 inverseModelMat4 = glm::inverse(worldMat);
+				tmpRay.applyMat4(inverseModelMat4);
+
+				for (int j = 0; j < meshDatas.size(); j++) {
+					MeshUnit meshData = meshDatas[j];
+					sphereBounding.setFromPosition(meshData.vertices);
+					box3Bounding.setFromPosition(meshData.vertices);
+					bool sphereIntersect = tmpRay.intersectsSphere(sphereBounding);
+					bool boxIntersect = tmpRay.intersectsBox(box3Bounding);
+					if (sphereIntersect && boxIntersect) {
+						std::cout << "intersect" << std::endl;
+						std::vector<int> indices = meshData.indices;
+						for (int k = 0; k + 2 < indices.size(); k += 3) {
+							int v1 = indices[k];
+							int v2 = indices[k + 1];
+							int v3 = indices[k + 2];
+
+							glm::vec3 vA = meshData.vertices[v1];
+							glm::vec3 vB = meshData.vertices[v2];
+							glm::vec3 vC = meshData.vertices[v3];
+
+							glm::vec3 intersectPoint = tmpRay.intersectTriangle(vA, vB, vC, false);
+							if (intersectPoint.x != NULL && intersectPoint.y != NULL && intersectPoint.z != NULL) {
+								std::cout << "truely intersect" << std::endl;
+								//TODO show select effect
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
 void processMouseClickEvent(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		if ((x >= 0 && x < WINDOW_WIDTH) && (y >= 0 && y < WINDOW_HEIGHT)) {
 			mouseDown = true;
+			doPickObject(x, y);
 		}
 	}
 	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
@@ -904,8 +983,8 @@ void processKeyDownEvent(unsigned char key, int x, int y) {
 }
 
 void processRightMenuEvents(int option) {
-	if (shadowRender && 
-		(option == ORIDINARY_RENDER || option == DEFFERED_RENDER || option == BLOOM_RENDER) ) {
+	if (shadowRender &&
+		(option == ORIDINARY_RENDER || option == DEFFERED_RENDER || option == BLOOM_RENDER)) {
 		clear();
 	}
 

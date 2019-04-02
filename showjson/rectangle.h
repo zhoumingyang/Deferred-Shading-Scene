@@ -9,7 +9,7 @@ private:
 	float height;
 	void init();
 public:
-	Rect(const float& _width = 1.96f, const float& _height = 1.96f);
+	Rect(const float& _width = 1.88f, const float& _height = 1.88f);
 	~Rect();
 	float getWidth() const;
 	float getHeight() const;

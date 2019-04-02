@@ -2,8 +2,10 @@
 #ifndef IBO_H
 #define IBO_H
 #include <iostream>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #pragma comment(lib,"glew32.lib")
 #define MAXBUFFEROBJECTS 1000
 

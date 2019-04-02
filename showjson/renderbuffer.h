@@ -3,8 +3,10 @@
 #define RENDER_BUFFER_H
 #include <iostream>
 #include <vector>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #pragma comment(lib,"glew32.lib")
 #define MAXRENDEROBJECTS 3000
 

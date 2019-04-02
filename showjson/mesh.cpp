@@ -134,6 +134,40 @@ void Mesh::processNode(const aiNode *node, const aiScene *scene) {
 	}
 }
 
+void Mesh::createMergeMeshUnit() {
+	if (type == OBJMESH) {
+		int sumPosCursor = 0;
+		int sumNormCursor = 0;
+		int sumUvCursor = 0;
+		int sumIndiceCursor = 0;
+		std::vector<glm::vec3> mergeVertices;
+		std::vector<glm::vec3> mergeNormals;
+		std::vector<glm::vec2> mergeUvs;
+		std::vector<int> mergeIndices;
+		for (int i = 0; i < meshUnits.size(); i++) {
+			MeshUnit meshUnit = meshUnits[i];
+			for (int p = 0; p < meshUnit.vertices.size(); p++) {
+				mergeVertices.push_back(meshUnit.vertices[p]);
+			}
+			for (int q = 0; q < meshUnit.normals.size(); q++) {
+				mergeNormals.push_back(meshUnit.normals[q]);
+			}
+			for (int k = 0; k < meshUnit.uvs.size(); k++) {
+				mergeUvs.push_back(meshUnit.uvs[k]);
+			}
+			for (int j = 0; j < meshUnit.indices.size(); j++) {
+				mergeIndices.push_back(meshUnit.indices[j] + sumIndiceCursor);
+			}
+			auto it = std::max_element(std::begin(mergeIndices), std::end(mergeIndices));
+			sumIndiceCursor = static_cast<int>(*it)+1;
+		}
+		MeshUnit mergeMeshUnit(mergeVertices, mergeUvs, mergeNormals, mergeIndices);
+		std::vector <MeshUnit>().swap(meshUnits);
+		meshUnits.push_back(mergeMeshUnit);
+	}
+	
+}
+
 void Mesh::initBuffer() {
 	if (objUrl.size() > 0) {
 		Assimp::Importer importer;
@@ -144,12 +178,12 @@ void Mesh::initBuffer() {
 		}
 		processNode(scene->mRootNode, scene);
 	}
+	createMergeMeshUnit();
 	pVao = new VAO(meshUnits.size());
 	pVertexBuffer = new VBO(meshUnits.size());
 	pUvBuffer = new VBO(meshUnits.size());
 	pNormalBuffer = new VBO(meshUnits.size());
 	pIbo = new IBO(meshUnits.size());
-
 	for (int i = 0; i < meshUnits.size(); i++) {
 		pVertexBuffer->setBufferData(i, &meshUnits[i].vertices[0], meshUnits[i].vertices.size() * sizeof(glm::vec3));
 		pVertexBuffer->unBind();
@@ -265,4 +299,8 @@ MeshType Mesh::getMeshType() const {
 
 glm::vec3 Mesh::getColor() const {
 	return color;
+}
+
+std::vector<MeshUnit> Mesh::getMeshUnits() const {
+	return meshUnits;
 }

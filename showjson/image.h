@@ -3,8 +3,10 @@
 #define IMAGE_H
 #include <iostream>
 #include <string>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #pragma comment(lib,"glew32.lib")
 class Image {
 private:

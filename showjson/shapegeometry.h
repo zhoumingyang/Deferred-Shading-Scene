@@ -4,8 +4,10 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #include "glm/glm.hpp"
 #pragma comment(lib,"glew32.lib")
 

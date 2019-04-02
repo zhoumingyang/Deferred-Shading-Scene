@@ -3,8 +3,10 @@
 #define FBO_H
 #include <iostream>
 #include <vector>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #include "renderbuffer.h"
 #include "texture2D.h"
 #include "texture.h"

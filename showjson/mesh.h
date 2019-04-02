@@ -35,7 +35,7 @@ struct MeshUnit {
 
 class Mesh {
 private:
-	VAO* pVao;
+	VAO * pVao;
 	VBO* pVertexBuffer;
 	VBO* pUvBuffer;
 	VBO* pNormalBuffer;
@@ -52,6 +52,7 @@ private:
 	MeshType type;
 	void processNode(const aiNode *node, const aiScene *scene);
 	MeshUnit processMesh(const aiMesh *mesh, const aiScene *scene);
+	void createMergeMeshUnit();
 public:
 	Mesh(const Model& model);
 	Mesh(const Model& model, Shader* _pShader);
@@ -73,5 +74,6 @@ public:
 	void setShader(Shader* _pShader);
 	MeshType getMeshType() const;
 	glm::vec3 getColor() const;
+	std::vector<MeshUnit> getMeshUnits() const;
 };
 #endif // !MESH_H

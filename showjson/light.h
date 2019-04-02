@@ -3,8 +3,10 @@
 #define LIGHT_H
 #include <iostream>
 #include <string>
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+#include "GL/glew.h"
+#include "GL/glut.h"
 #include "glm.hpp"
 #pragma comment(lib,"glew32.lib")
 
