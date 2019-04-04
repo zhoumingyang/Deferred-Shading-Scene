@@ -61,6 +61,14 @@ Mesh::Mesh(const MeshUnit& meshUnit) {
 	normalMat = glm::mat4(1.0);
 }
 
+Mesh::Mesh(const MeshUnit& meshUnit, const glm::mat4& _modelMat, const glm::mat4& _normalMat, const MeshType& _type) {
+	meshUnits.push_back(meshUnit);
+	color = glm::vec3(0.32, 0.32, 0.9);
+	type = _type;
+	modelMat = _modelMat;
+	normalMat = _normalMat;
+}
+
 Mesh::Mesh(const ShapeGeometry& shape) {
 	MeshUnit tmpMeshUnit(shape.getVertices(), shape.getUvs(), shape.getNormals(), shape.getIndices());
 	meshUnits.push_back(tmpMeshUnit);

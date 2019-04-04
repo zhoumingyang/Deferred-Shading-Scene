@@ -254,5 +254,5 @@ void Ray::applyMat4(const glm::mat4& mat) {
 	glm::vec3 tmp = direction;
 	direction.x = mat[0][0] * tmp.x + mat[0][1] * tmp.y + mat[0][2] * tmp.z;
 	direction.y = mat[1][0] * tmp.x + mat[1][1] * tmp.y + mat[1][2] * tmp.z;
-	direction.z = mat[2][0] * tmp.x + mat[1][1] * tmp.y + mat[2][2] * tmp.z;
+	direction.z = mat[2][0] * tmp.x + mat[2][1] * tmp.y + mat[2][2] * tmp.z;
 }

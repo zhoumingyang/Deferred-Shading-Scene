@@ -28,8 +28,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -70,7 +70,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\mycode\showjson\showjson\assimp;D:\mycode\showjson\showjson\json;D:\mycode\showjson\showjson\glm;$(IncludePath)</IncludePath>
+    <IncludePath>D:\mycode\showjson\showjson\json;D:\mycode\showjson\showjson\jsonsrc;D:\mycode\showjson\showjson\assimp;D:\mycode\showjson\showjson\glm;D:\mycode\showjson\showjson\GL;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\mycode\showjson\showjson\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>D:\mycode\showjson\showjson\json;D:\mycode\showjson\showjson\jsonsrc;D:\mycode\showjson\showjson\assimp;D:\mycode\showjson\showjson\glm;D:\mycode\showjson\showjson\GL;$(IncludePath)</IncludePath>
     <LibraryPath>D:\mycode\showjson\showjson\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -80,9 +84,10 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\mycode\showjson\showjson\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;AntTweakBar.lib;freeglut.lib;glew32.lib;glew32s.lib;glut.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -105,6 +110,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc140-mt.lib;AntTweakBar.lib;freeglut.lib;glew32.lib;glew32s.lib;glut.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -122,10 +128,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="box3math.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="fbo.cpp" />
     <ClCompile Include="fileparse.cpp" />
     <ClCompile Include="gbuffer.cpp" />
+    <ClCompile Include="geomath.cpp" />
     <ClCompile Include="ibo.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="jsonsrc\json_reader.cpp" />
@@ -135,20 +143,31 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="parallellight.cpp" />
+    <ClCompile Include="planemath.cpp" />
     <ClCompile Include="pointlight.cpp" />
+    <ClCompile Include="ray.cpp" />
+    <ClCompile Include="rectangle.cpp" />
     <ClCompile Include="renderbuffer.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="shapegeometry.cpp" />
+    <ClCompile Include="sphere.cpp" />
+    <ClCompile Include="spheremath.cpp" />
     <ClCompile Include="spotlight.cpp" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="texture2D.cpp" />
+    <ClCompile Include="texturecube.cpp" />
+    <ClCompile Include="trianglemath.cpp" />
     <ClCompile Include="vao.cpp" />
     <ClCompile Include="vbo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="box3math.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="drand.h" />
     <ClInclude Include="fbo.h" />
     <ClInclude Include="fileparse.h" />
     <ClInclude Include="gbuffer.h" />
+    <ClInclude Include="geomath.h" />
     <ClInclude Include="ibo.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="jsonconfig.h" />
@@ -168,24 +187,47 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="parallellight.h" />
+    <ClInclude Include="planemath.h" />
     <ClInclude Include="pointlight.h" />
+    <ClInclude Include="ray.h" />
+    <ClInclude Include="rectangle.h" />
     <ClInclude Include="renderbuffer.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="shapegeometry.h" />
+    <ClInclude Include="sphere.h" />
+    <ClInclude Include="spheremath.h" />
     <ClInclude Include="spotlight.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="texture2D.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="texturecube.h" />
+    <ClInclude Include="trianglemath.h" />
     <ClInclude Include="ui.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="vao.h" />
     <ClInclude Include="vbo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="jsonsrc\json_valueiterator.inl" />
-    <None Include="shader\renderToGbuffer.fs" />
-    <None Include="shader\renderToGbuffer.vs" />
-    <None Include="shader\renderToWindow.fs" />
-    <None Include="shader\renderToWindow.vs" />
-    <None Include="shader\showjson.fs" />
-    <None Include="shader\showjson.vs" />
+    <None Include="shader\gaussianBlur.vert" />
+    <None Include="shader\guassianBlur.frag" />
+    <None Include="shader\renderFinal.frag" />
+    <None Include="shader\renderFinal.vert" />
+    <None Include="shader\renderShadow.frag" />
+    <None Include="shader\renderShadow.vert" />
+    <None Include="shader\renderToFbuffer.frag" />
+    <None Include="shader\renderToFbuffer.vert" />
+    <None Include="shader\renderToGbuffer.frag" />
+    <None Include="shader\renderToGbuffer.vert" />
+    <None Include="shader\renderToWindow.frag" />
+    <None Include="shader\renderToWindow.vert" />
+    <None Include="shader\selectEffect.frag" />
+    <None Include="shader\selectEffect.vert" />
+    <None Include="shader\shadowDepth.frag" />
+    <None Include="shader\shadowDepth.geom" />
+    <None Include="shader\shadowDepth.vert" />
+    <None Include="shader\showjson.frag" />
+    <None Include="shader\showjson.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

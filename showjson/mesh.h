@@ -14,6 +14,7 @@ enum MeshType {
 	NORMALMESH,
 	OBJMESH,
 	AIDMESH,
+	SELECTED,
 	NONE
 };
 
@@ -24,6 +25,10 @@ struct MeshUnit {
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 	std::vector<int> indices;
+	MeshUnit() {
+
+	}
+
 	MeshUnit(const std::vector<glm::vec3> _vertices, const std::vector<glm::vec2> _uvs,
 		const std::vector<glm::vec3> _normals, const std::vector<int> _indices) {
 		vertices = _vertices;
@@ -57,6 +62,7 @@ public:
 	Mesh(const Model& model);
 	Mesh(const Model& model, Shader* _pShader);
 	Mesh(const MeshUnit& meshUnit);
+	Mesh(const MeshUnit& meshUnit, const glm::mat4& _modelMat, const glm::mat4& _normalMat, const MeshType& _type);
 	Mesh(const ShapeGeometry& shape);
 	~Mesh();
 	void initBuffer();

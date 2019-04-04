@@ -54,9 +54,6 @@
     <ClCompile Include="ibo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="texture.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="image.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -88,6 +85,42 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="gbuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="sphere.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="shapegeometry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="rectangle.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="texture2D.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="texturecube.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ray.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="geomath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="box3math.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="spheremath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="planemath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="trianglemath.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,9 +179,6 @@
     <ClInclude Include="ibo.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="texture.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="image.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -191,27 +221,105 @@
     <ClInclude Include="gbuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="shapegeometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="rectangle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="texture2D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="texturecube.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ray.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="geomath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="box3math.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="spheremath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="planemath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="util.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="trianglemath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="jsonsrc\json_valueiterator.inl">
       <Filter>头文件\json</Filter>
     </None>
-    <None Include="shader\showjson.fs">
+    <None Include="shader\gaussianBlur.vert">
       <Filter>资源文件\shader</Filter>
     </None>
-    <None Include="shader\showjson.vs">
+    <None Include="shader\guassianBlur.frag">
       <Filter>资源文件\shader</Filter>
     </None>
-    <None Include="shader\renderToGbuffer.fs">
+    <None Include="shader\renderFinal.frag">
       <Filter>资源文件\shader</Filter>
     </None>
-    <None Include="shader\renderToGbuffer.vs">
+    <None Include="shader\renderFinal.vert">
       <Filter>资源文件\shader</Filter>
     </None>
-    <None Include="shader\renderToWindow.fs">
+    <None Include="shader\renderShadow.frag">
       <Filter>资源文件\shader</Filter>
     </None>
-    <None Include="shader\renderToWindow.vs">
+    <None Include="shader\renderShadow.vert">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\shadowDepth.frag">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\shadowDepth.geom">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\shadowDepth.vert">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToFbuffer.vert">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToFbuffer.frag">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToGbuffer.vert">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToGbuffer.frag">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToWindow.vert">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\renderToWindow.frag">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\showjson.vert">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\showjson.frag">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\selectEffect.frag">
+      <Filter>资源文件\shader</Filter>
+    </None>
+    <None Include="shader\selectEffect.vert">
       <Filter>资源文件\shader</Filter>
     </None>
   </ItemGroup>

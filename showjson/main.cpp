@@ -25,8 +25,8 @@
 #define RENDER_START 5
 #define SHADOW_RENDER 6
 
-bool oridinaryRender = false;
-bool defferedRender = true;
+bool oridinaryRender = true;
+bool defferedRender = false;
 bool bloomRender = false;
 bool shadowRender = false;
 
@@ -58,6 +58,9 @@ const char* pSdfsFileName = "./shader/shadowDepth.frag";
 //shadow render
 const char* pSvsFileName = "./shader/renderShadow.vert";
 const char* pSfsFileName = "./shader/renderShadow.frag";
+//select effect
+const char* pSevsFileName = "./shader/selectEffect.vert";
+const char* pSefsFileName = "./shader/selectEffect.frag";
 
 std::vector<Model> models;
 /***************************camera********************************/
@@ -84,6 +87,7 @@ Shader* renderBlur;
 Shader* renderFinal;
 Shader* shadowDepth;
 Shader* renderShadow;
+Shader* renderSelected;
 
 /*************************all lights**********************************/
 glm::vec3 spotLightPosition(0.0, 100.0, 0.0);
@@ -113,6 +117,11 @@ Mesh* quaMesh;
 
 float nearPlane = 1.0f;
 float farPlane = 10000.0f;//150.0f;
+
+//select mesh
+MeshUnit selectedMeshUnit;
+Mesh* selectedMesh;
+bool selectedFlag = false;
 
 void renderStandarLine() {
 	glLoadIdentity();
@@ -428,7 +437,7 @@ void initOptionDisable() {
 }
 
 void initGL() {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	//shader init
 	//oridinary
 	renderOridinary = new Shader(pVSFileName, pFSFileName);
@@ -451,6 +460,9 @@ void initGL() {
 	//shadow render
 	renderShadow = new Shader(pSvsFileName, pSfsFileName);
 	renderShadow->compileShader();
+	//selected render
+	renderSelected = new Shader(pSevsFileName, pSefsFileName);
+	renderSelected->compileShader();
 
 	//scene init
 	initLight();
@@ -531,6 +543,7 @@ void initGL() {
 	if (err != GL_NO_ERROR) {
 		std::cout << "some thing error: " << err << std::endl;
 		clear();
+		getchar();
 		exit(1);
 	}
 	delete p;
@@ -720,6 +733,22 @@ void mutiRenderShadowWindow() {
 	shadowDepthTexture->unBind();
 }
 
+void renderSelectedMesh() {
+	std::vector<Mesh*> pMesh = renderSelected->getMeshes();
+	renderSelected->setUniform3f("pointColor", glm::vec3(0.32, 0.32, 0.85));
+	renderSelected->setUniform1f("opacity", 0.65);
+	for (int i = 0; i < pMesh.size(); i++) {
+		if (pMesh[i] != NULL) {
+			glm::mat4 worldMat = pMesh[i]->getModelMatrix();
+			glm::mat4 normalMat = pMesh[i]->getNormalMatrix();
+			MV = camera.getModelViewMat(pMesh[i]->getModelMatrix());
+			MVP = camera.getProjectViewModelMat(pMesh[i]->getModelMatrix());
+			renderSelected->setUniformMatrix4fv("mvp", &MVP[0][0]);
+			pMesh[i]->render();
+		}
+	}
+}
+
 void renderGL() {
 	clock_t currentFrame = clock();
 	deltaTime = float(currentFrame - lastFrame) / 1000.0;
@@ -842,14 +871,23 @@ void renderGL() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	//draw standar line
 	initOptionDisable();
+	if (selectedFlag == true && oridinaryRender) {
+		renderSelected->use();
+		renderSelectedMesh();
+		renderSelected->unuse();
+	}
+
+	//draw standar line
+	//initOptionDisable();
 	renderStandarLine();
 	glutSwapBuffers();
 	glutPostRedisplay();
 }
 
 bool doPickObject(int x, int y) {
+	selectedFlag = false;
+
 	//viewport space to ndc space
 	float nx = (2.0f * float(x)) / float(WINDOW_WIDTH) - 1.0f;
 	float ny = 1.0f - (2.0f * float(y)) / float(WINDOW_HEIGHT);
@@ -879,12 +917,17 @@ bool doPickObject(int x, int y) {
 	if (pMesh.size() > 0) {
 		SphereMath sphereBounding;
 		Box3Math box3Bounding;
+		std::vector<MeshUnit> candidateSelected;
+		std::vector<float> distances;
+		std::vector<glm::mat4> worldMats;
+		std::vector<glm::mat4> normalMats;
 		for (int i = 0; i < pMesh.size(); i++) {
 			MeshType meshType = pMesh[i]->getMeshType();
 			if (meshType == OBJMESH) {
 				std::vector<MeshUnit> meshDatas = pMesh[i]->getMeshUnits();
 				//world space to model space
 				glm::mat4 worldMat = pMesh[i]->getModelMatrix();
+				glm::mat4 normalMat = pMesh[i]->getNormalMatrix();
 				Ray tmpRay = Ray(rayOrigin, rayDir);
 				glm::mat4 inverseModelMat4 = glm::inverse(worldMat);
 				tmpRay.applyMat4(inverseModelMat4);
@@ -896,7 +939,6 @@ bool doPickObject(int x, int y) {
 					bool sphereIntersect = tmpRay.intersectsSphere(sphereBounding);
 					bool boxIntersect = tmpRay.intersectsBox(box3Bounding);
 					if (sphereIntersect && boxIntersect) {
-						std::cout << "intersect" << std::endl;
 						std::vector<int> indices = meshData.indices;
 						for (int k = 0; k + 2 < indices.size(); k += 3) {
 							int v1 = indices[k];
@@ -909,15 +951,36 @@ bool doPickObject(int x, int y) {
 
 							glm::vec3 intersectPoint = tmpRay.intersectTriangle(vA, vB, vC, false);
 							if (intersectPoint.x != NULL && intersectPoint.y != NULL && intersectPoint.z != NULL) {
-								std::cout << "truely intersect" << std::endl;
-								//TODO show select effect
-								break;
+								selectedFlag = true;
+								worldMats.push_back(worldMat);
+								normalMats.push_back(normalMat);
+								candidateSelected.push_back(meshData);
+								float tmpDistance = glm::distance(rayOrigin, intersectPoint);
+								distances.push_back(tmpDistance);
 							}
 						}
 					}
 				}
 			}
 		}
+		if (!selectedFlag) {
+			return false;
+		}
+		int minDisIndex = 0;
+		float minDis = 0.0;
+		for (int i = 0; i < distances.size(); i++) {
+			if (distances[i] > minDis) {
+				minDis = distances[i];
+				minDisIndex = i;
+			}
+		}
+		selectedMeshUnit = candidateSelected[minDisIndex];
+		glm::mat4 tmpWorldMat = worldMats[minDisIndex];
+		glm::mat4 tmpNormalMat = normalMats[minDisIndex];
+		selectedMesh = new Mesh(selectedMeshUnit, tmpWorldMat, tmpNormalMat, SELECTED);
+		selectedMesh->initBuffer();
+		std::vector<Mesh*> selectedMeshes = { selectedMesh };
+		renderSelected->setMeshes(selectedMeshes);
 	}
 	return true;
 }
