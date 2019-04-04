@@ -16,6 +16,7 @@ Now the result scene is only rendered by some random point light, the small sphe
 4. releaize some basic light source including direction light,point light and spot light<br>
 5. releaize basic camera operation and right menu to switch scene<br>
 6. deferred shading bloom effect.
+7. ray pick effect.
 ## json format<br>
 the json is divided by scenes, each scene has obj files and meshes wich is design by user<br>
 ![image](https://github.com/zhoumingyang/Deferred-Shading-Scene/blob/master/showjson/image/scenefile.png)<br>
