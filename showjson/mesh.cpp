@@ -124,7 +124,7 @@ MeshUnit Mesh::processMesh(const aiMesh *mesh, const aiScene *scene) {
 		aiFace face = mesh->mFaces[i];
 		for (int j = 0; j < face.mNumIndices; j++) {
 			tmpIndices.push_back(face.mIndices[j]);
-		}	
+		}
 	}
 	return MeshUnit(tmpVertices, tmpUvs, tmpNormals, tmpIndices);
 }
@@ -140,6 +140,18 @@ void Mesh::processNode(const aiNode *node, const aiScene *scene) {
 	for (int i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
 	}
+}
+
+void Mesh::initBounding() {
+	std::vector<glm::vec3> allVertices;
+	for (int i = 0; i < meshUnits.size(); i++) {
+		MeshUnit meshUnit = meshUnits[i];
+		for (int j = 0; j < meshUnit.vertices.size(); j++) {
+			allVertices.push_back(meshUnit.vertices[j]);
+		}
+	}
+	sphereBounding.setFromPosition(allVertices);
+	box3Bounding.setFromPosition(allVertices);
 }
 
 void Mesh::createMergeMeshUnit() {
@@ -167,13 +179,13 @@ void Mesh::createMergeMeshUnit() {
 				mergeIndices.push_back(meshUnit.indices[j] + sumIndiceCursor);
 			}
 			auto it = std::max_element(std::begin(mergeIndices), std::end(mergeIndices));
-			sumIndiceCursor = static_cast<int>(*it)+1;
+			sumIndiceCursor = static_cast<int>(*it) + 1;
 		}
 		MeshUnit mergeMeshUnit(mergeVertices, mergeUvs, mergeNormals, mergeIndices);
 		std::vector <MeshUnit>().swap(meshUnits);
 		meshUnits.push_back(mergeMeshUnit);
 	}
-	
+
 }
 
 void Mesh::initBuffer() {
@@ -187,6 +199,7 @@ void Mesh::initBuffer() {
 		processNode(scene->mRootNode, scene);
 	}
 	createMergeMeshUnit();
+	initBounding();
 	pVao = new VAO(meshUnits.size());
 	pVertexBuffer = new VBO(meshUnits.size());
 	pUvBuffer = new VBO(meshUnits.size());
@@ -311,4 +324,20 @@ glm::vec3 Mesh::getColor() const {
 
 std::vector<MeshUnit> Mesh::getMeshUnits() const {
 	return meshUnits;
+}
+
+SphereMath Mesh::getSphereBounds() const {
+	return sphereBounding;
+}
+
+void Mesh::setSphereBounds(const SphereMath& sphereBounds) {
+	sphereBounding = sphereBounds;
+}
+
+Box3Math Mesh::getBox3Bounds() const {
+	return box3Bounding;
+}
+
+void Mesh::setBox3Bounds(const Box3Math& box3Bounds){
+	box3Bounding = box3Bounds;
 }

@@ -2,8 +2,6 @@
 #ifndef VBO_H
 #define VBO_H
 #include <iostream>
-//#include <GL/glew.h>
-//#include <gl/glut.h>
 #include "GL/glew.h"
 #include "GL/glut.h"
 #pragma comment(lib,"glew32.lib")

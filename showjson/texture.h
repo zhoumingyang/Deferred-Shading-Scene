@@ -2,8 +2,6 @@
 #ifndef TEXTURE_BASIC_H
 #define TEXTURE_BASIC_H
 #include <iostream>
-//#include <GL/glew.h>
-//#include <GL/glut.h>
 #include "GL/glew.h"
 #include "GL/glut.h"
 #pragma comment(lib,"glew32.lib")

@@ -6,6 +6,8 @@
 #include "ibo.h"
 #include "texture2D.h"
 #include "shapegeometry.h"
+#include "box3math.h"
+#include "spheremath.h"
 #include <Importer.hpp>
 #include <scene.h>
 #include <postprocess.h>
@@ -55,9 +57,12 @@ private:
 	std::vector<MeshUnit> meshUnits;
 	glm::vec3 color;
 	MeshType type;
+	SphereMath sphereBounding;
+	Box3Math box3Bounding;
 	void processNode(const aiNode *node, const aiScene *scene);
 	MeshUnit processMesh(const aiMesh *mesh, const aiScene *scene);
 	void createMergeMeshUnit();
+	void initBounding();
 public:
 	Mesh(const Model& model);
 	Mesh(const Model& model, Shader* _pShader);
@@ -81,5 +86,9 @@ public:
 	MeshType getMeshType() const;
 	glm::vec3 getColor() const;
 	std::vector<MeshUnit> getMeshUnits() const;
+	SphereMath getSphereBounds() const;
+	Box3Math getBox3Bounds() const;
+	void setSphereBounds(const SphereMath& sphereBounds);
+	void setBox3Bounds(const Box3Math& box3Bounds);
 };
 #endif // !MESH_H

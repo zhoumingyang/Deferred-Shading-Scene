@@ -932,13 +932,16 @@ bool doPickObject(int x, int y) {
 				glm::mat4 inverseModelMat4 = glm::inverse(worldMat);
 				tmpRay.applyMat4(inverseModelMat4);
 
-				for (int j = 0; j < meshDatas.size(); j++) {
-					MeshUnit meshData = meshDatas[j];
-					sphereBounding.setFromPosition(meshData.vertices);
-					box3Bounding.setFromPosition(meshData.vertices);
-					bool sphereIntersect = tmpRay.intersectsSphere(sphereBounding);
-					bool boxIntersect = tmpRay.intersectsBox(box3Bounding);
-					if (sphereIntersect && boxIntersect) {
+				//do intersect checking with bounding box
+				sphereBounding = pMesh[i]->getSphereBounds();
+				box3Bounding = pMesh[i]->getBox3Bounds();
+				bool sphereIntersect = tmpRay.intersectsSphere(sphereBounding);
+				bool boxIntersect = tmpRay.intersectsBox(box3Bounding);
+
+				//do intersect checking with triangle
+				if (sphereIntersect && boxIntersect) {
+					for (int j = 0; j < meshDatas.size(); j++) {
+						MeshUnit meshData = meshDatas[j];
 						std::vector<int> indices = meshData.indices;
 						for (int k = 0; k + 2 < indices.size(); k += 3) {
 							int v1 = indices[k];
